@@ -1,0 +1,110 @@
+<div class="mod_EventEditor block">
+<?php if ($this->headline): ?>
+<<?php echo $this->hl; ?>><?php echo $this->headline; ?></<?php echo $this->hl; ?>>
+<?php endif; ?>
+
+<?php echo $this->InfoMessage; ?>
+<h2> <?php echo $GLOBALS['TL_LANG']['MSC']['caledit_currentActionClone']; ?></h2>
+
+<p class="caledit_info">
+	<?php if ($this->CurrentEventLink): ?>
+		<span class="date"> <?php echo $this->CurrentDate; ?>: </span><span class="title"><?php echo $this->CurrentTitle; ?></span>
+		<span class= "caledit_publishinfo"> (<?php echo $this->CurrentPublishedInfo; ?>) </span>
+	<?php else: ?>
+		<span class= "caledit_publishinfo"> (<?php echo $this->CurrentPublishedInfo; ?>) </span>
+	<?php endif; ?>
+</p>
+
+
+<?php if (($this->deleteRef) OR ($this->cloneRef) or ($this->editRef) or ($this->CurrentEventLink)  ) : ?>
+	<ul class="CalendarEditActionList">	
+		<?php if ($this->CurrentEventLink): ?>
+			<li class="viewlink"><a href="<?php echo $this->CurrentEventLink; ?>" title="<?php echo $this->CurrentTitle; ?>"> <?php echo $GLOBALS['TL_LANG']['MSC']['caledit_viewLabel'] ?> </a></li>
+		<?php endif; ?>
+		<?php if ($this->editRef): ?>
+			<li class="editlink"><a href="<?php echo $this->editRef; ?>" title="<?php echo $this->editTitle; ?>"> <?php echo $this->editLabel; ?> </a></li>
+		<?php endif; ?>
+		<?php if ($this->cloneRef): ?>
+			<li class="clonelink"><a href="<?php echo $this->cloneRef; ?>" title="<?php echo $this->cloneTitle; ?>"> <?php echo $this->cloneLabel; ?> </a></li>
+		<?php endif; ?>
+		<?php if ($this->deleteRef): ?>
+			<li class="deletelink"><a href="<?php echo $this->deleteRef; ?>" title="<?php echo $this->deleteTitle; ?>"> <?php echo $this->deleteLabel; ?> </a></li>
+		<?php endif; ?>	
+	</ul>
+<?php endif; ?>
+
+<?php if (!$this->fields): ?>
+<h2>  <?php echo $this->EditHeadline ?></h2>
+<p class="error"><?php echo $this->FatalError; ?></p>
+<?php else: ?>
+<div class="event<?php echo $this->classList; ?>">
+<h2>  <?php echo $GLOBALS['TL_LANG']['MSC']['caledit_InsertMoreDates']; ?></h2>
+
+<?php if ($this->CloneWarning): ?>
+<p class="CalendarEditWarning"> <?php echo $this->CloneWarning; ?> </p>
+<?php endif; ?>
+
+<?php if ($this->ContentWarning): ?>
+<p class="CalendarEditWarning"> <?php echo $this->ContentWarning; ?> </p>
+<?php endif; ?>
+
+<?php if ($this->ImageWarning): ?>
+<p class="CalendarEditWarning"> <?php echo $this->ImageWarning; ?> </p>
+<?php endif; ?>
+
+<div class="formbody">
+        <form action="<?php echo $this->action; ?>" method="post">
+        <input type="hidden" name="FORM_SUBMIT" value="caledit_submit" /><?php echo $this->messages; ?>
+		<input type="hidden" name="REQUEST_TOKEN" value="{{request_token}}">
+		<table cellpadding="2" cellspacing="2" border="0" >
+		<tbody>
+			<tbody>
+			<?php for ($i = 1; $i <= 10; $i++): ?>
+				
+				<tr class="<?php echo $class; ?>">
+				<?php if ($this->fields['start'.$i]): ?>
+					<?php $objWidget = $this->fields['start'.$i]; ?>
+						<td class="label">
+						<?php echo $objWidget->generateLabel(); ?>
+						<?php echo $objWidget->generateWithError(); ?></td>
+				<?php endif; ?>
+			
+				<?php if ($this->fields['end'.$i]): ?>
+					<?php $objWidget = $this->fields['end'.$i]; ?>
+						<td class="label">
+						<?php echo $objWidget->generateLabel(); ?>
+						<?php echo $objWidget->generateWithError(); ?></td>
+				<?php endif; ?>
+				
+			<?php endfor; ?>
+			
+			<?php if ($this->fields['captcha']): ?>
+				<?php $objWidget = $this->fields['captcha']; ?>		
+				<tr class="<?php echo $class; ?>">
+					<td class="label">
+						<?php echo $objWidget->generateQuestion(); 
+							echo '<span class="mandatory">*</span>';?></td>
+					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
+				</tr>			
+			<?php endif; ?>
+					
+			<tr class="<?php echo $class; ?>">
+				<td class="label">&nbsp;</td>
+				<td class="value"><input type="submit" class="submit" value="<?php echo $this->submit; ?>" /></td>
+			</tr>
+			
+			<?php if ($this->fields['jumpToSelection']): ?>
+				<?php $objWidget = $this->fields['jumpToSelection']; ?>				
+				<tr class="<?php echo $class; ?>">
+					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
+					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
+				</tr>			
+			<?php endif; ?>
+		</tbody>
+		</tbody>
+		</table>       
+        </form>
+</div>
+</div>
+<?php endif; ?>
+</div>
