@@ -14,7 +14,7 @@ namespace DanielGausi\CalendarEditorBundle\ContaoManager;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
-use DanielGausi\CalendarEditorBundle\DanielGausiCalendarEditorBundle;
+use DanielGausi\contao-calendareditor-bundle\DanielGausiCalendarEditorBundle;
 use Contao\CoreBundle\ContaoCoreBundle;
 
 
