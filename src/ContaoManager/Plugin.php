@@ -21,7 +21,7 @@ use Contao\CoreBundle\ContaoCoreBundle;
 /**
  * Plugin for the Contao Manager.
  */
-class Plugin implements BundlePluginInterface    
+class Plugin implements BundlePluginInterface {   
     public function getBundles(ParserInterface $parser)
     {
         return [
