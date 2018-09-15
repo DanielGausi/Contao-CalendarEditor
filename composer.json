@@ -1,0 +1,32 @@
+{
+  "name": "danielgausi/contao-calendareditor-bundle",
+  "description": "Contao Extension to create and edit calendar events in the frontend",
+  "keywords": ["contao", "calendar", "calendar_editor", "calendar editor", "calendar frontend"],
+  "type": "contao-bundle",
+  "homepage": "https://github.com/DanielGausi/Contao-CalendarEditor",
+  "license": "LGPL-3.0-or-later",
+	
+	"require": {
+		"php": ">=5.6.0",
+		"contao/core-bundle": "~4.4" ,
+		"menatwork/contao-multicolumnwizard": "^3.3"
+	},
+	"autoload": {
+		"psr-4": {
+			"DanielGausi\\CalendarEditorBundle\\": "src/"
+		},		
+		"extra":{
+			"contao-manager-plugin": "DanielGausi\\CalendarEditorBundle\\ContaoManager\\Plugin"
+		},
+        "classmap": [
+            "src/Resources/contao/"
+		],
+		"exclude-from-classmap": [
+            "src/Resources/contao/config/",
+            "src/Resources/contao/dca/",
+            "src/Resources/contao/languages/",
+            "src/Resources/contao/templates/"
+		]
+  	}
+	
+}

@@ -16,8 +16,8 @@
  * Front end modules
  */
 
-$GLOBALS['FE_MOD']['events']['calendarEdit'] = 'ModuleCalenderEdit';
-$GLOBALS['FE_MOD']['events']['EventEditor'] = 'ModuleEventEditor';
-$GLOBALS['FE_MOD']['events']['EventReaderEditLink'] = 'ModuleEventReaderEdit';
-$GLOBALS['FE_MOD']['events']['EventHiddenList'] = 'ModuleHiddenEventlist';
+$GLOBALS['FE_MOD']['events']['calendarEdit'] = 'DanielGausi\CalendarEditor\ModuleCalenderEdit';
+$GLOBALS['FE_MOD']['events']['EventEditor'] = 'DanielGausi\CalendarEditor\ModuleEventEditor';
+$GLOBALS['FE_MOD']['events']['EventReaderEditLink'] = 'DanielGausi\CalendarEditor\ModuleEventReaderEdit';
+$GLOBALS['FE_MOD']['events']['EventHiddenList'] = 'DanielGausi\CalendarEditor\ModuleHiddenEventlist';
 $GLOBALS['TL_HOOKS']['getAllEvents'][] = array('ListAllEvents_Hook', 'updateAllEvents');
