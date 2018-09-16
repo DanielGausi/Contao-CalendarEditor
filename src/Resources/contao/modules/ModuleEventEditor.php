@@ -168,7 +168,7 @@ class ModuleEventEditor extends Events {
 			  }
 
 			$result = ((!$objCalendar->caledit_onlyUser) ||                
-				( (FE_USER_LOGGED_IN) && ( $userIsAdmin  || ($user->id == $CurrentObjectData->FE_User)) )                
+				( (FE_USER_LOGGED_IN) && ( $userIsAdmin  || ($user->id == $CurrentObjectData->fe_user)) )                
 				);
 			if (!$result) {
 				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_OnlyUser'];
@@ -844,9 +844,9 @@ class ModuleEventEditor extends Events {
 			// everything seems to be ok, so we can add the POST Data
 			// into the Database
 			if (!FE_USER_LOGGED_IN) {
-				$NewEventData['FE_User'] = ''; // no user
+				$NewEventData['fe_user'] = ''; // no user
 			} else {
-				$NewEventData['FE_User'] = $this->User->id; // set the FE_user here
+				$NewEventData['fe_user'] = $this->User->id; // set the FE_user here
 			}
 						
 			if (is_null($NewEventData['published'])){
@@ -1157,9 +1157,9 @@ class ModuleEventEditor extends Events {
 			// everything seems to be ok, so we can add the POST Data
 			// into the Database
 			if (!FE_USER_LOGGED_IN) {
-				$currentEventData['FE_User'] = ''; // no user
+				$currentEventData['fe_user'] = ''; // no user
 			} else {
-				$currentEventData['FE_User'] = $this->User->id; // set the FE_user here
+				$currentEventData['fe_user'] = $this->User->id; // set the FE_user here
 			}
 			
 			// for the notification E-Mail
@@ -1169,9 +1169,9 @@ class ModuleEventEditor extends Events {
 			
 			// overwrite User
 			if (!FE_USER_LOGGED_IN) {
-				$currentEventData['FE_User'] = ''; // no user
+				$currentEventData['fe_user'] = ''; // no user
 			} else {
-				$currentEventData['FE_User'] = $this->User->id; // set the FE_user here
+				$currentEventData['fe_user'] = $this->User->id; // set the FE_user here
 			}
 			// Set Publish-Value
 			$currentEventData['published'] = $published;

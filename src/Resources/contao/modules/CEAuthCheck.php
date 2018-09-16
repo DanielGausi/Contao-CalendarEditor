@@ -93,7 +93,7 @@
 				// Allow only if CalendarEditing is not restricted to future events -OR- EventTime is later then CurrentTime, 
 				&& ((!$objCalendar->caledit_onlyFuture) ||  ($currentTime <= $aEvent['startTime']) )
 				// Allow only if CalendarEditing is not restricted to the Owner -OR- The Owner is currently logged in
-				&& ((!$objCalendar->caledit_onlyUser) || ($aEvent['FE_User'] == $userID))
+				&& ((!$objCalendar->caledit_onlyUser) || ($aEvent['fe_user'] == $userID))
 				);
 
 		}
@@ -112,7 +112,7 @@
 				// Allow only if CalendarEditing is not restricted to future events -OR- EventTime is later then CurrentTime, 
 				&& ((!$objCalendar->caledit_onlyFuture) ||  (time() <= $objEvent->startTime) )
 				// Allow only if CalendarEditing is not restricted to the Owner -OR- The Owner is currently logged in
-				&& ((!$objCalendar->caledit_onlyUser) || ($objEvent->FE_User == $User->id))
+				&& ((!$objCalendar->caledit_onlyUser) || ($objEvent->fe_user == $User->id))
 				);
 
 		}
