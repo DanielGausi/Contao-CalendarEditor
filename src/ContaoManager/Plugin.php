@@ -14,20 +14,18 @@ namespace DanielGausi\CalendarEditorBundle\ContaoManager;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
-use DanielGausi\contao-calendareditor-bundle\DanielGausiCalendarEditorBundle;
-use Contao\CoreBundle\ContaoCoreBundle;
 
-
-/**
- * Plugin for the Contao Manager.
- */
-class Plugin implements BundlePluginInterface {   
+class Plugin implements BundlePluginInterface
+{
+    /**
+     * {@inheritdoc}
+     */
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create(DanielGausiCalendarEditorBundle::class)
-                ->setLoadAfter([ContaoCoreBundle::class])
-                ->setReplace(['calendareditor'])
+            BundleConfig::create('DanielGausi\CalendarEditorBundle\DanielGausiCalendarEditorBundle')
+                ->setLoadAfter(['Contao\CoreBundle\ContaoCoreBundle'])
+                ->setReplace(['calendareditor']),
         ];
     }
 }

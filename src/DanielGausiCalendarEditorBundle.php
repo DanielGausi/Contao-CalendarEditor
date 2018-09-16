@@ -9,7 +9,7 @@
  *
  */
 
-namespace DanielGausi\CalendarEditor;
+namespace DanielGausi\CalendarEditorBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
