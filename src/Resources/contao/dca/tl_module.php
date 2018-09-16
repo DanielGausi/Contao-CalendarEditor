@@ -277,4 +277,3 @@ class tl_module_eventeditor extends Backend
 	}
 }
 
-?>

@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
+<?php 
 
 /**
  * Contao Open Source CMS
@@ -29,7 +29,6 @@
  */
 
 
-
 $GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default'] = $GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default']. ';{edit_legend},fe_user, disable_editing';
 
 
@@ -51,5 +50,3 @@ $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['disable_editing'] = array
 	'sql'					  => "char(1) NOT NULL default ''"
 );
 
-
-?>

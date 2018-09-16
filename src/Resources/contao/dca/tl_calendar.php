@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
+<?php 
 
 /**
  * Contao Open Source CMS
@@ -100,5 +100,3 @@ $GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_onlyUser'] = array
 	'sql'					  => "char(1) NOT NULL default ''"
 );
 
-
-?>
