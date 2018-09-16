@@ -33,7 +33,7 @@
  * Add palettes to tl_module
  */
 
-$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] = $GLOBALS['TL_DCA']['tl_calendar']['palettes']['default']. ';{edit_legend},AllowEdit';
+$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},AllowEdit';
 
 $GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['AllowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser, caledit_groups, caledit_adminGroup';
 $GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'AllowEdit';

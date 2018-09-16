@@ -29,7 +29,7 @@
  */
 
 
-$GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default'] = $GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default']. ';{edit_legend},fe_user, disable_editing';
+$GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default'] .= ';{edit_legend},fe_user, disable_editing';
 
 
 $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['fe_user'] = array
