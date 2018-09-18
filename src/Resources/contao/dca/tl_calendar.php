@@ -33,7 +33,9 @@
  * Add palettes to tl_calendar
  */
 
-$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},allowEdit';
+$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] = '{title_legend},name,headline,type;{edit_legend},allowEdit';
+
+//$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},allowEdit';
 
 //$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] = str_replace
 //(
