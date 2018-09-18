@@ -1,24 +1,9 @@
-<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
+<?php 
 
 /**
  * Contao Open Source CMS
  * Copyright (C) 2005-2010 Leo Feyer
  *
- * Formerly known as TYPOlight Open Source CMS.
- *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program. If not, please visit the Free
- * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
  *
@@ -33,10 +18,10 @@
  * Add palettes to tl_module
  */
 
- $GLOBALS['TL_DCA']['tl_module']['palettes']['calendarEdit']        =  &$GLOBALS['TL_DCA']['tl_module']['palettes']['calendar'].';{edit_legend},caledit_add_jumpTo; {edit_holidays},cal_holidayCalendar' ; 
+ $GLOBALS['TL_DCA']['tl_module']['palettes']['calendarEdit']        =  $GLOBALS['TL_DCA']['tl_module']['palettes']['calendar'].';{edit_legend},caledit_add_jumpTo; {edit_holidays},cal_holidayCalendar' ; 
  $GLOBALS['TL_DCA']['tl_module']['palettes']['EventEditor']         = '{title_legend},name,headline,type;{redirect_legend},jumpTo;{config_legend},cal_calendar,caledit_mandatoryfields, caledit_allowPublish,caledit_allowDelete,caledit_allowClone,caledit_sendMail;{template_legend}, caledit_template,caledit_delete_template, caledit_clone_template, caledit_tinMCEtemplate, caledit_alternateCSSLabel,caledit_usePredefinedCss;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
  $GLOBALS['TL_DCA']['tl_module']['palettes']['EventReaderEditLink'] = '{title_legend},name,headline,type;{config_legend},cal_calendar,caledit_showDeleteLink,caledit_showCloneLink';
- $GLOBALS['TL_DCA']['tl_module']['palettes']['EventHiddenList']     = &$GLOBALS['TL_DCA']['tl_module']['palettes']['eventlist'];
+ $GLOBALS['TL_DCA']['tl_module']['palettes']['EventHiddenList']     = $GLOBALS['TL_DCA']['tl_module']['palettes']['eventlist'];
 
  $GLOBALS['TL_DCA']['tl_module']['subpalettes']['caledit_usePredefinedCss'] = 'caledit_cssValues';
  $GLOBALS['TL_DCA']['tl_module']['subpalettes']['caledit_sendMail']         = 'caledit_mailRecipient';
