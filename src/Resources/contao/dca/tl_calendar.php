@@ -44,9 +44,9 @@ $GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] = '{title_legend},name,
  //   $GLOBALS['TL_DCA']['tl_calendar']['palettes']['default']
 //);
 
-
-$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser, caledit_groups, caledit_adminGroup';
 $GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'allowEdit';
+$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser, caledit_groups, caledit_adminGroup';
+
 
 
 $GLOBALS['TL_DCA']['tl_calendar']['fields']['allowEdit'] = array
