@@ -15,19 +15,10 @@
  * Add palettes to tl_calendar
  */
 
-$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] = '{title_legend},name,headline,type;{edit_legend},allowEdit';
-
-//$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},allowEdit';
-
-//$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] = str_replace
-//(
- //   '{extended_legend},bg_color,fg_color;',
- //   '{extended_legend},bg_color,fg_color;{edit_legend},allowEdit;',
- //   $GLOBALS['TL_DCA']['tl_calendar']['palettes']['default']
-//);
+$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},allowEdit';
 
 $GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'allowEdit';
-$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser, caledit_groups, caledit_adminGroup';
+$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser;';
 
 
 
@@ -65,25 +56,6 @@ $GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_loginRequired'] = array
 	'eval'                    => array('default'=>'true'),
 	'sql'					  => "char(1) NOT NULL default '1'"
 );
-
-$GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_groups'] = array
-(
-	'label'                   => &$GLOBALS['TL_LANG']['tl_calendar']['caledit_groups'],
-	'inputType'               => 'checkbox',
-	'foreignKey'              => 'tl_member_group.name',
-    'eval'                    => array(/*'mandatory'=>true, */ 'multiple'=>true),
-	'sql'					  => "blob NULL"
-);
-
-$GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_adminGroup'] = array
-(
-	'label'                   => &$GLOBALS['TL_LANG']['tl_calendar']['caledit_adminGroup'],
-	'inputType'               => 'checkbox',
-	'foreignKey'              => 'tl_member_group.name',
-	'eval'                    => array('mandatory'=>false, 'multiple'=>true),
-	'sql'					  => "blob NULL"
-);
-
 $GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_onlyUser'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_calendar']['caledit_onlyUser'],
