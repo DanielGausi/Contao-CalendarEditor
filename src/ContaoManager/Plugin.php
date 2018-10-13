@@ -28,10 +28,10 @@ class Plugin implements BundlePluginInterface
             BundleConfig::create(CalendarEditorBundle::class)
                 ->setLoadAfter(
 					[
-						'Contao\CoreBundle\ContaoCoreBundle'
+						'Contao\CoreBundle\ContaoCoreBundle',
 						'Contao\CalendarBundle\ContaoCalendarBundle'
 					]
-				)                
+				)
         ];
     }
 }
