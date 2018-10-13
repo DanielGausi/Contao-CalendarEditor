@@ -26,7 +26,12 @@ class Plugin implements BundlePluginInterface
     {
         return [
             BundleConfig::create('DanielGausi\CalendarEditorBundle\DanielGausiCalendarEditorBundle')
-                ->setLoadAfter(['Contao\CoreBundle\ContaoCoreBundle'])
+                ->setLoadAfter(
+					[
+						'Contao\CoreBundle\ContaoCoreBundle'
+						'Contao\CalendarBundle\ContaoCalendarBundle'
+					]
+				)
                 ->setReplace(['calendareditor']),
         ];
     }
