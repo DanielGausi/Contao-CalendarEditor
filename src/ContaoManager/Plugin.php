@@ -11,6 +11,8 @@
 
 namespace DanielGausi\CalendarEditorBundle\ContaoManager;
 
+use DanielGausi\CalendarEditorBundle\CalendarEditorBundle;
+
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
