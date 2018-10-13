@@ -18,7 +18,7 @@
 $GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},allowEdit';
 
 $GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'allowEdit';
-$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser;';
+$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser';
 
 
 
