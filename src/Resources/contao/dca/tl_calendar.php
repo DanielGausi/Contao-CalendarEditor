@@ -18,7 +18,7 @@
 $GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},allowEdit';
 
 $GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'allowEdit';
-$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser';
+$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser, caledit_groups, caledit_adminGroup';
 
 
 
@@ -62,4 +62,22 @@ $GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_onlyUser'] = array
 	'exclude'                 => true,
 	'inputType'               => 'checkbox',
 	'sql'					  => "char(1) NOT NULL default ''"
+);
+
+$GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_groups'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_calendar']['caledit_groups'],
+	'inputType'               => 'checkbox',
+	'foreignKey'              => 'tl_member_group.name',
+    'eval'                    => array(/*'mandatory'=>true, */ 'multiple'=>true),
+	'sql'					  => "blob NULL"
+);
+
+$GLOBALS['TL_DCA']['tl_calendar']['fields']['caledit_adminGroup'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_calendar']['caledit_adminGroup'],
+	'inputType'               => 'checkbox',
+	'foreignKey'              => 'tl_member_group.name',
+	'eval'                    => array('mandatory'=>false, 'multiple'=>true),
+	'sql'					  => "blob NULL"
 );
