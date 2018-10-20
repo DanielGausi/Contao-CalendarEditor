@@ -14,6 +14,6 @@ namespace DanielGausi\CalendarEditorBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 
-class DanielGausiCalendarEditorBundle extends Bundle
+class CalendarEditorBundle extends Bundle
 {
 }
