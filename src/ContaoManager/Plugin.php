@@ -25,11 +25,12 @@ class Plugin implements BundlePluginInterface
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create(CalendarEditorBundle::class)
+            BundleConfig::create('DanielGausi\CalendarEditorBundle\DanielGausiCalendarEditorBundle')
                 ->setLoadAfter(
 					[
 						'Contao\CoreBundle\ContaoCoreBundle',
-						'Contao\CalendarBundle\ContaoCalendarBundle'
+						'Contao\CalendarBundle\ContaoCalendarBundle',
+						'MenAtWork\MultiColumnWizard'
 					]
 				)
         ];
