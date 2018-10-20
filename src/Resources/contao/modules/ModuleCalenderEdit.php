@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
+<?php 
 
 /**
  * Contao Open Source CMS
@@ -70,6 +70,7 @@ class ModuleCalenderEdit extends ModuleCalendar
 		}		
 	}
 
+	
 
 	// overwrite the compileWeeks-Method from ModuleCalendar
 	protected function compileWeeks()
@@ -201,7 +202,7 @@ class ModuleCalenderEdit extends ModuleCalendar
             $objTemplate->title = $this->headline;
             $objTemplate->id = $this->id;
             $objTemplate->link = $this->name;
-            $objTemplate->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
+            $objTemplate->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
 
             return $objTemplate->parse();
         }       

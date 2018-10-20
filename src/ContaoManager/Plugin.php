@@ -13,8 +13,8 @@ namespace DanielGausi\CalendarEditorBundle\ContaoManager;
 
 use DanielGausi\CalendarEditorBundle\CalendarEditorBundle;
 
-use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
+use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 
 class Plugin implements BundlePluginInterface
@@ -25,11 +25,12 @@ class Plugin implements BundlePluginInterface
     public function getBundles(ParserInterface $parser)
     {
         return [
-            BundleConfig::create('DanielGausi\CalendarEditorBundle\DanielGausiCalendarEditorBundle')
+            BundleConfig::create(CalendarEditorBundle::class)
                 ->setLoadAfter(
 					[
 						'Contao\CoreBundle\ContaoCoreBundle',
-						'Contao\CalendarBundle\ContaoCalendarBundle'
+						'Contao\CalendarBundle\ContaoCalendarBundle',
+						'MenAtWork\MultiColumnWizard'
 					]
 				)
         ];
