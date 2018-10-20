@@ -55,15 +55,15 @@ class ModuleEventEditor extends Events {
             $objTemplate->title = $this->headline;
             $objTemplate->id = $this->id;
             $objTemplate->link = $this->name;
-            $objTemplate->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
+            $objTemplate->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;			                     
             return $objTemplate->parse();
         }
 
-        $this->cal_calendar = $this->sortOutProtected(deserialize($this->cal_calendar));
+        //$this->cal_calendar = $this->sortOutProtected(deserialize($this->cal_calendar));
         // Return if there are no calendars
-        if (!is_array($this->cal_calendar) || count($this->cal_calendar) < 1) {
+        //if (!is_array($this->cal_calendar) || count($this->cal_calendar) < 1) {
             return '';
-        }
+        //}
         return parent::generate();
     }
 
@@ -525,7 +525,11 @@ class ModuleEventEditor extends Events {
 	
 	protected function HandleEdit($editID, $currentEventObject, $AllowedCalendars) {
 		$this->strTemplate = $this->caledit_template;
-        $this->Template = new FrontendTemplate($this->strTemplate);
+		
+		$this->strTemplate = 'eventEdit_default';
+		
+		
+        $this->Template = new \FrontendTemplate($this->strTemplate);
 				
 		
 		// 1. Get Data from post/get
@@ -885,7 +889,7 @@ class ModuleEventEditor extends Events {
 	
 	protected function HandleDelete($currentEventObject) {
 		$this->strTemplate = $this->caledit_delete_template;
-        $this->Template = new FrontendTemplate($this->strTemplate);		
+        $this->Template = new \FrontendTemplate($this->strTemplate);		
 				
 		if (!$this->caledit_allowDelete){
 			$this->Template->FatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoDelete'];
@@ -1003,7 +1007,7 @@ class ModuleEventEditor extends Events {
 	protected function HandleClone($currentEventObject) 
 	{
 		$this->strTemplate = $this->caledit_clone_template;
-        $this->Template = new FrontendTemplate($this->strTemplate);
+        $this->Template = new \FrontendTemplate($this->strTemplate);
 		
 		$pid = $currentEventObject->pid;			
 		$currentID  = $currentEventObject->id;		
@@ -1319,11 +1323,18 @@ class ModuleEventEditor extends Events {
 				$fatalError = True; 				
             }
         }
+		
+		/////////////////////////////////////////
+		// testweise auch hier später löschen
+		$this->HandleEdit($editID, $currentEventObject, $AllowedCalendars);
+		return;
+		/////////////////////////////////////////
+		
 
 		// Fatal error, editing not allowed, abort.
         if ($fatalError) {         
 			$this->strTemplate = $this->caledit_template;
-			$this->Template = new FrontendTemplate($this->strTemplate);
+			$this->Template = new \FrontendTemplate($this->strTemplate);
             $this->Template->FatalError = $this->ErrorString;
             return ;
         }

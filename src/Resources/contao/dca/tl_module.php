@@ -92,9 +92,10 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['caledit_template'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_module']['caledit_template'],
 	'default'                 => 'eventEdit_default',
+	'exclude' => true,
 	'inputType'               => 'select',
-	'options_callback'        => array('tl_module_eventeditor', 'getEventEditTemplates'),
-	'eval'                    => array ('tl_class'=>'w50'),
+	'options_callback'        => array('calendar_eventeditor', 'getEventEditTemplates'),
+	'eval'                    => array ('tl_class'=>'w100'),
 	'sql'					  => "varchar(32) NOT NULL default ''"
 );
 
@@ -102,9 +103,10 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['caledit_clone_template'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_module']['caledit_clone_template'],
 	'default'                 => 'eventEdit_duplicate',
+	'exclude' => true,
 	'inputType'               => 'select',
-	'options_callback'        => array('tl_module_eventeditor', 'getEventEditTemplates'),
-	'eval'                    => array ('tl_class'=>'w50'),
+	'options_callback'        => array('calendar_eventeditor', 'getEventEditTemplates'),
+	'eval'                    => array ('tl_class'=>'w100'),
 	'sql'					  => "varchar(32) NOT NULL default ''"
 );
 
@@ -112,19 +114,21 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['caledit_delete_template'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_module']['caledit_delete_template'],
 	'default'                 => 'eventEdit_delete',
+	'exclude' => true,
 	'inputType'               => 'select',
-	'options_callback'        => array('tl_module_eventeditor', 'getEventEditTemplates'),
-	'eval'                    => array ('tl_class'=>'w50'),
+	'options_callback'        => array('calendar_eventeditor', 'getEventEditTemplates'),
+	'eval'                    => array ('tl_class'=>'w100'),
 	'sql'					  => "varchar(32) NOT NULL default ''"
 );
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['caledit_tinMCEtemplate'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_module']['caledit_tinMCEtemplate'],
-	'default'                 => 'tinyFrontendMinimal',
+	//'default'                 => 'tinyFrontendMinimal',
+	'default'                 => 'wuppdi',
 	'inputType'               => 'select',
-	'options_callback'        => array('tl_module_eventeditor', 'getConfigFiles'),
-	'eval'			  		  => array('includeBlankOption'=>true, 'tl_class'=>'w50'),
+	'options_callback'        => array('calendar_eventeditor', 'getConfigFiles'),
+	'eval'			  		  => array('includeBlankOption'=>true, 'tl_class'=>'w100'),
 	'sql'					  => "varchar(32) NOT NULL default ''"
 );
 
@@ -195,13 +199,13 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['cal_holidayCalendar'] = array
 	'label'                   => &$GLOBALS['TL_LANG']['tl_module']['caledit_holidayCalendar'],
 	'exclude'                 => true,
 	'inputType'               => 'checkbox',
-	'options_callback'        => array('tl_module_eventeditor', 'getCalendars'),
+	'options_callback'        => array('calendar_eventeditor', 'getCalendars'),
 	'eval'                    => array('mandatory'=>false, 'multiple'=>true),
 	'sql'                     => "blob NULL"
 );
 
 
-class tl_module_eventeditor extends Backend
+class calendar_eventeditor extends Backend
 {
 
 	/**
@@ -218,9 +222,9 @@ class tl_module_eventeditor extends Backend
 	 * @param object
 	 * @return array
 	 */
-	public function getEventEditTemplates(DataContainer $dc)
+	public function getEventEditTemplates()
 	{
-		return $this->getTemplateGroup('eventEdit_', $dc->activeRecord->pid);
+		return $this->getTemplateGroup('eventEdit_');
 	}	
 	
 	public function getCalendars()
@@ -251,13 +255,16 @@ class tl_module_eventeditor extends Backend
     public function getConfigFiles()
 	{
 		$arrConfigs = array();
-		$arrFiles = scan(TL_ROOT . '/system/config/');
+		$arrConfigs[] = 'wuppdi';
+		$arrConfigs[] = 'wuppdidu';
+		
+		//$arrFiles = scan(TL_ROOT . '/system/config/');
 
-		foreach( $arrFiles as $file ) {
-			if (substr($file, 0, 4) == 'tiny') {
-				$arrConfigs[] = basename($file, '.php');
-			}
-		}
+		//foreach( $arrFiles as $file ) {
+		//	if (substr($file, 0, 4) == 'tiny') {
+		//		$arrConfigs[] = basename($file, '.php');
+		//	}
+		//}
 		return $arrConfigs;
 	}
 }
