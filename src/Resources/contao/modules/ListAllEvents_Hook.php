@@ -105,7 +105,7 @@ class ListAllEvents_Hook extends Frontend
 											
 											
 
-                if ($objCalendar->AllowEdit) {
+                if ($objCalendar->allowEdit) {
                     // get the JumpToEdit-Page for this calendar
 	                $objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=(SELECT caledit_jumpTo FROM tl_calendar WHERE id=?)")
 									  ->limit(1)

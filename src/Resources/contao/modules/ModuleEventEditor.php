@@ -31,8 +31,11 @@
 /**
  * Class ModuleEventEditor
  */
+ 
+//namespace DanielGausi\CalendarEditorBundle;
 
 include_once('CEAuthCheck.php');
+
  
 class ModuleEventEditor extends Events {
     /**
@@ -44,6 +47,8 @@ class ModuleEventEditor extends Events {
 	
 	protected $ErrorString = '';
 	
+	protected $DontGenerateJumpURL = True;
+		
 	/**
     * generate Module
     */
@@ -59,13 +64,15 @@ class ModuleEventEditor extends Events {
             return $objTemplate->parse();
         }
 
-        //$this->cal_calendar = $this->sortOutProtected(deserialize($this->cal_calendar));
+        $this->cal_calendar = $this->sortOutProtected(deserialize($this->cal_calendar));
         // Return if there are no calendars
-        //if (!is_array($this->cal_calendar) || count($this->cal_calendar) < 1) {
+        if (!is_array($this->cal_calendar) || count($this->cal_calendar) < 1) {
             return '';
-        //}
+        }
         return parent::generate();
     }
+	
+	
 
     /**
      * add the selected TinyMCE into the header of the page
@@ -149,10 +156,10 @@ class ModuleEventEditor extends Events {
 		if (UserIsAuthorizedUser($objCalendar, $user)) {
             // ok, user is allowed to edit events here.
             // however, he is not necessary the owner of the event.
-            if ($CurrentObjectData->numRows < 1) {
-				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_unexpected']; 
-                return false; // Event not found or something else is wrong
-            }
+            //if ($CurrentObjectData->numRows < 1) {
+			//	$this->ErrorString = $CurrentObjectData->id.'sdssddsd'.$GLOBALS['TL_LANG']['MSC']['caledit_unexpected']; 
+            //    return false; // Event not found or something else is wrong
+            //}
             // if the editing is disabled in the BE: Deny editing in the FE
             if ($CurrentObjectData->disable_editing) {
 				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_DisabledEvent'];				
@@ -243,7 +250,7 @@ class ModuleEventEditor extends Events {
 		return $varValue;
     }
 	
-	public function GenerateJump($userSetting, $DBid) {
+	public function GenerateJump($userSetting, $DBid, $PID) {
 		switch ($userSetting) {
 			case "":				
 				$jt = preg_replace('/\?.*$/i', '', $this->Environment->request);
@@ -264,10 +271,19 @@ class ModuleEventEditor extends Events {
 				break;
 				
 			case "view":
-				$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($DBid);
+				//$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($DBid);
+				// uuuuuuuuuuuuuuuuuuuuuuuuuuu				
+						
+				
+				$currentEventObject = \CalendarEventsModel::findPublishedByParentAndIdOrAlias($DBid, array($PID));
+				if (is_null($currentEventObject)) {
+					// something is wong (probably a hidden event)
+					$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($DBid);					
+				}
 				
 				if ($currentEventObject->published) {
 					// get the JumpTo-Page for this calendar			
+					
 					$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=(SELECT jumpTo FROM tl_calendar WHERE id=?)")
 								  ->limit(1)
 								  ->execute($currentEventObject->pid);
@@ -281,7 +297,8 @@ class ModuleEventEditor extends Events {
 					} else {
 						$showUrl = $this->Environment->request;
 					}
-					$jt = $this->generateEventUrl($currentEventObject, $showUrl);
+					
+					$jt = $this->generateEventUrl($currentEventObject, $showUrl);					
 					$this->redirect($jt, 301);			
 				} else {
 					// event is not published, so show it in the editor again
@@ -377,7 +394,11 @@ class ModuleEventEditor extends Events {
 		$this->Template->CurrentTitle = $currentEventObject->title;
 		$this->Template->CurrentDate = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $currentEventObject->startDate);
 					
-		$this->Template->CurrentEventLink = $this->generateEventUrl($currentEventObject, $showUrl);
+		if ($this->DontGenerateJumpURL) {
+				$this->Template->CurrentEventLink = '';
+		} else {
+			$this->Template->CurrentEventLink = $this->generateEventUrl($currentEventObject, $showUrl);
+		}
 		$this->Template->CurrentPublished = $currentEventObject->published;
 		if ($currentEventObject->published == '1') {
 			$this->Template->CurrentPublishedInfo = $GLOBALS['TL_LANG']['MSC']['caledit_publishedEvent'];
@@ -525,9 +546,6 @@ class ModuleEventEditor extends Events {
 	
 	protected function HandleEdit($editID, $currentEventObject, $AllowedCalendars) {
 		$this->strTemplate = $this->caledit_template;
-		
-		$this->strTemplate = 'eventEdit_default';
-		
 		
         $this->Template = new \FrontendTemplate($this->strTemplate);
 				
@@ -876,7 +894,7 @@ class ModuleEventEditor extends Events {
 				}
 			}
 	
-			$this->GenerateJump($jumpToSelection, $DBid);		
+			$this->GenerateJump($jumpToSelection, $DBid, $NewEventData['pid']);		
 		} else {
 			// Do NOT Submit
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
@@ -992,7 +1010,7 @@ class ModuleEventEditor extends Events {
 				$this->SendNotificationMail($oldEventData, -1, $this->User->username, '');
 			}
 			
-			$this->GenerateJump('', ''); // jump to the default page
+			$this->GenerateJump('', '', ''); // jump to the default page
 		} else {
 			// Do NOT Submit
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
@@ -1219,7 +1237,7 @@ class ModuleEventEditor extends Events {
 			}	
 			
 			// after this: jump to "jumpTo-Page"												
-			$this->GenerateJump($jumpToSelection, $DBid);
+			$this->GenerateJump($jumpToSelection, $DBid, $currentEventData['pid']);
 		} else {
 			// Do NOT Submit
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
@@ -1314,28 +1332,44 @@ class ModuleEventEditor extends Events {
         $AllowedCalendars = $this->getCalendars($this->User);			
         if (count($AllowedCalendars) == 0) {
 			$fatalError = True;				
-			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'].'sdsdsdds';
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'];
         } else {			
-			$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($editID);
-            $AuthorizedUser = (bool) $this->checkUserEditRights($this->User, $editID, $currentEventObject);
-            if (!$AuthorizedUser) {
-                // a proper ErrorString is set in checkUserEditRights
-				$fatalError = True; 				
-            }
-        }
-		
-		/////////////////////////////////////////
-		// testweise auch hier später löschen
-		$this->HandleEdit($editID, $currentEventObject, $AllowedCalendars);
-		return;
-		/////////////////////////////////////////
-		
+			//$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($editID);           
+			// uuuuuuuuuuuuuuuuu
+            
+			$calIDs = array();
+			foreach ($AllowedCalendars as $aCal) {
+					$calIDs[] = $aCal['id'];
+			}
+						
+			//$currentEventObject = findPublishedByParentAndIdOrAliass($editID, $calIDs);
+			$currentEventObject = \CalendarEventsModel::findPublishedByParentAndIdOrAlias($editID, $calIDs);
+			if (is_null($currentEventObject)) {
+				// something is wong (probably a hidden event)
+				$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($editID);
+				$AuthorizedUser = (bool) $this->checkUserEditRights($this->User, $editID, $currentEventObject);
+				if (!$AuthorizedUser) {
+					// a proper ErrorString is set in checkUserEditRights
+					$fatalError = True; 				
+				}
+				$this->DontGenerateJumpURL = True;
+			} else
+			{
+				$this->DontGenerateJumpURL = False;
+				$AuthorizedUser = (bool) $this->checkUserEditRights($this->User, $editID, $currentEventObject);
+				if (!$AuthorizedUser) {
+					// a proper ErrorString is set in checkUserEditRights
+					$fatalError = True; 				
+				}
+			}
+		}
+        	
 
 		// Fatal error, editing not allowed, abort.
         if ($fatalError) {         
 			$this->strTemplate = $this->caledit_template;
 			$this->Template = new \FrontendTemplate($this->strTemplate);
-            $this->Template->FatalError = $this->ErrorString;
+            $this->Template->FatalError = $this->ErrorString.'sdssddsd';			
             return ;
         }
 

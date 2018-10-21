@@ -27,6 +27,11 @@
  * @package    CalendarEditor
  * @license    GNU/LGPL
  */
+ 
+//namespace DanielGausi\CalendarEditorBundle;
+
+//use Contao\Calendar;
+//use Contao\CalendarModel;
 
  include_once('CEAuthCheck.php');
 

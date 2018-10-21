@@ -24,8 +24,8 @@ class Plugin implements BundlePluginInterface
      */
     public function getBundles(ParserInterface $parser)
     {
-        return [
-            BundleConfig::create('DanielGausi\CalendarEditorBundle\DanielGausiCalendarEditorBundle')
+        return [			
+            BundleConfig::create(CalendarEditorBundle::class)
                 ->setLoadAfter(
 					[
 						'Contao\CoreBundle\ContaoCoreBundle',

@@ -28,6 +28,7 @@
  * @license    GNU/LGPL
  */
 
+//namespace DanielGausi\CalendarEditorBundle;
 
 /**
  * Class ModuleHiddenEventlist

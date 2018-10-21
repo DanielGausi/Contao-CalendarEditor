@@ -33,6 +33,8 @@
  * Class ModuleEventReaderEdit 
  */
  
+//namespace DanielGausi\CalendarEditorBundle; 
+ 
 include_once('CEAuthCheck.php');
  
 class ModuleEventReaderEdit extends Events
@@ -111,7 +113,7 @@ class ModuleEventReaderEdit extends Events
 			return; // No calendar found
 		}
 		
-		if ($objCalendar->AllowEdit) {
+		if ($objCalendar->allowEdit) {
 			// Calendar allows editing
 			// check user rights			
 			
