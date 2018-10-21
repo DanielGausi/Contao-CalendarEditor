@@ -151,30 +151,13 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['caledit_usePredefinedCss'] = array
 $GLOBALS['TL_DCA']['tl_module']['fields']['caledit_cssValues'] = array
 (
 	'label'                   => &$GLOBALS['TL_LANG']['tl_module']['caledit_cssValues'],
-	'inputType'               => 'multitextWizard',	
+	'inputType'               => 'multiColumnWizard',	
 	'eval'                    => array
       (
-        'style'=>'width:100%;',
-        'columns' => array
-          (
-            array
-            (
-              'name' => 'label', 
-              'label' => &$GLOBALS['TL_LANG']['tl_module']['css_label'],
-              'mandatory' => true,
-              'width' => '100px' 
-            ),
-            array
-            (
-              'name' => 'value', 
-              'label' => &$GLOBALS['TL_LANG']['tl_module']['css_value'],
-              'mandatory' => true,
-              'width' => '50px',
-              'rgxp' => 'alpha', 
-            )
-          )
+        'tl_class' => 'w100',
+		'columnsCallback' => array('calendar_eventeditor', 'getCSSValues')        
        ),
-	 'sql'					  => "blob NULL"
+	 'sql'					  => "text NULL"
 );
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['caledit_showDeleteLink'] = array
@@ -227,6 +210,28 @@ class calendar_eventeditor extends Backend
 		return $this->getTemplateGroup('eventEdit_');
 	}	
 	
+	public function getCSSValues()
+	{
+		$columnFields = null;
+
+        $columnFields = array
+        (
+          'label' => array (
+              'label' => &$GLOBALS['TL_LANG']['tl_module']['css_label'],
+              'mandatory' => true,
+			  'default' => null,
+              'inputType' => 'text',
+              'eval' => array('style' => 'width:100px')
+            ),
+			'value' => array (              
+              'label' => &$GLOBALS['TL_LANG']['tl_module']['css_value'],
+              'mandatory' => true,              
+			  'inputType' => 'text',
+              'eval' => array('rgxp' => 'alpha', 'style' => 'width:70px') 
+            )
+          );
+		return $columnFields;
+	}
 	public function getCalendars()
 	{
 		if (!$this->User->isAdmin && !is_array($this->User->calendars))

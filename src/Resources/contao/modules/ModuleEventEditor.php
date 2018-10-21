@@ -735,8 +735,8 @@ class ModuleEventEditor extends Events {
 			$opt = array();
 
 			foreach ($cssValues as $cssv) {
-				$opt[] = $cssv['1'];
-				$ref[$cssv['1']] = $cssv['0'];
+				$opt[] = $cssv['value'];
+				$ref[$cssv['value']] = $cssv['label'];
 			}
 
 			$fields['cssClass'] = array(
