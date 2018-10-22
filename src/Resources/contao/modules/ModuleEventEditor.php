@@ -79,12 +79,15 @@ class ModuleEventEditor extends Events {
      */
     public function addTinyMCE($str)
     {
+		
         if (!empty($str)) {
-            $strFile = sprintf('%s/system/config/%s.php', TL_ROOT, $str);
+            //$strFile = sprintf('%s/system/config/%s.php', TL_ROOT, $str);
+			$strFile = sprintf('%s/vendor/danielgausi/contao-calendareditor-bundle/src/Resources/contao/tinyMCE/%s.php', TL_ROOT, $str);
+					
             $this->rteFields = 'ctrl_details,ctrl_teaser,teaser';
             $this->language = 'en';
             // Fallback to English if the user language is not supported
-            if (file_exists(TL_ROOT . '/assets/tinymce4/langs/' . $GLOBALS['TL_LANGUAGE'] . '.js')) {
+            if (file_exists(TL_ROOT . '/assets/tinymce4/js/langs/' . $GLOBALS['TL_LANGUAGE'] . '.js')) {
                 $this->language = $GLOBALS['TL_LANGUAGE'];
             }
 

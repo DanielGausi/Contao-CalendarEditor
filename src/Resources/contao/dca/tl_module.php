@@ -260,16 +260,17 @@ class calendar_eventeditor extends Backend
     public function getConfigFiles()
 	{
 		$arrConfigs = array();
-		$arrConfigs[] = 'wuppdi';
-		$arrConfigs[] = 'wuppdidu';
+		//$arrConfigs[] = 'wuppdi';
+		//$arrConfigs[] = 'wuppdidu';
 		
 		//$arrFiles = scan(TL_ROOT . '/system/config/');
+		$arrFiles = scan(TL_ROOT);// . '/system/config/');
 
-		//foreach( $arrFiles as $file ) {
-		//	if (substr($file, 0, 4) == 'tiny') {
-		//		$arrConfigs[] = basename($file, '.php');
-		//	}
-		//}
+		foreach( $arrFiles as $file ) {
+			if (substr($file, 0, 4) == 'tiny') {
+				$arrConfigs[] = basename($file, '.php');
+			}
+		}
 		return $arrConfigs;
 	}
 }
