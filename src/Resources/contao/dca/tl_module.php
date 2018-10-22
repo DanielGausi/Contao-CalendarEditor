@@ -260,16 +260,14 @@ class calendar_eventeditor extends Backend
     public function getConfigFiles()
 	{
 		$arrConfigs = array();
-		//$arrConfigs[] = 'wuppdi';
-		//$arrConfigs[] = 'wuppdidu';
 		
 		//$arrFiles = scan(TL_ROOT . '/system/config/');
-		$arrFiles = scan(TL_ROOT);// . '/system/config/');
+		$arrFiles = scan(TL_ROOT.'/vendor/danielgausi/contao-calendareditor-bundle/src/Resources/contao/tinyMCE/');// . '/system/config/');
 
 		foreach( $arrFiles as $file ) {
-			if (substr($file, 0, 4) == 'tiny') {
+			//if (substr($file, 0, 4) == 'tiny') {
 				$arrConfigs[] = basename($file, '.php');
-			}
+			//}
 		}
 		return $arrConfigs;
 	}
