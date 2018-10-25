@@ -28,11 +28,13 @@
  * @license    GNU/LGPL
  */
 
-//namespace DanielGausi\CalendarEditorBundle;
+namespace DanielGausi\CalendarEditorBundle;
 
-/**
- * Class ModuleHiddenEventlist
- */
+use Contao\Calendar;
+use Contao\CalendarModel;
+use Contao\Events;
+
+
 class ModuleHiddenEventlist extends \ModuleEventlist
 {
 
@@ -180,7 +182,7 @@ class ModuleHiddenEventlist extends \ModuleEventlist
 	{
 		if (TL_MODE == 'BE')
 		{
-			$objTemplate = new BackendTemplate('be_wildcard');
+			$objTemplate = new \BackendTemplate('be_wildcard');
 
 			$objTemplate->wildcard = '### UNPULISHED EVENT LIST ###';
 			$objTemplate->title = $this->headline;

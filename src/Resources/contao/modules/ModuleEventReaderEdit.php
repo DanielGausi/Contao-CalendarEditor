@@ -33,7 +33,11 @@
  * Class ModuleEventReaderEdit 
  */
  
-//namespace DanielGausi\CalendarEditorBundle; 
+namespace DanielGausi\CalendarEditorBundle; 
+
+use Contao\Calendar;
+use Contao\CalendarModel;
+use Contao\Events;
  
 include_once('CEAuthCheck.php');
  
@@ -53,7 +57,7 @@ class ModuleEventReaderEdit extends Events
 	public function generate()
 	{
 		if (TL_MODE == 'BE') {
-			$objTemplate = new BackendTemplate('be_wildcard');
+			$objTemplate = new \BackendTemplate('be_wildcard');
 
 			$objTemplate->wildcard = '### EVENT READER EDIT LINK ###';
 			$objTemplate->title = $this->headline;
@@ -85,7 +89,7 @@ class ModuleEventReaderEdit extends Events
 	 */
 	protected function compile()
 	{
-		$this->Template = new FrontendTemplate($this->strTemplate);
+		$this->Template = new \FrontendTemplate($this->strTemplate);
 		$this->Template->editRef = '';
 		
 		// FE user is logged in

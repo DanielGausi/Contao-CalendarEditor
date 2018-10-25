@@ -28,7 +28,11 @@
  * @license    GNU/LGPL
  */
  
-//namespace DanielGausi\CalendarEditorBundle;
+namespace DanielGausi\CalendarEditorBundle;
+
+use Contao\Calendar;
+use Contao\CalendarModel;
+use Contao\Events;
 
 //use Contao\Calendar;
 //use Contao\CalendarModel;
@@ -38,7 +42,7 @@
 /**
  * Class ModuleCalenderEdit
  */
-class ModuleCalenderEdit extends ModuleCalendar
+class ModuleCalenderEdit extends \ModuleCalendar
 {
 
 	// variable which indicates whether events can be added or not (on elapsed days)
@@ -201,9 +205,9 @@ class ModuleCalenderEdit extends ModuleCalendar
 	public function generate()
     {
         if (TL_MODE == 'BE') {
-            $objTemplate = new BackendTemplate('be_wildcard');
+            $objTemplate = new \BackendTemplate('be_wildcard');
 
-            $objTemplate->wildcard = '### CALENDER WITH FE EDITING ###';
+            $objTemplate->wildcard = '### CALENDAR WITH FE EDITING ###';
             $objTemplate->title = $this->headline;
             $objTemplate->id = $this->id;
             $objTemplate->link = $this->name;

@@ -32,22 +32,27 @@
  * Class ModuleEventEditor
  */
  
-//namespace DanielGausi\CalendarEditorBundle;
+namespace DanielGausi\CalendarEditorBundle;		  
+
+use Contao\Calendar;
+use Contao\CalendarModel;
+use Contao\Events;
+
+use DanielGausi\CalendarEditorBundle\CalendarEventsModelEdit;
+use DanielGausi\CalendarEditorBundle\CalendarModelEdit;
 
 include_once('CEAuthCheck.php');
 
  
-class ModuleEventEditor extends Events {
+class ModuleEventEditor extends \Events {
     /**
      * Template
      *
      * @var string
      */
     protected $strTemplate = 'eventEdit_default';
-	
 	protected $ErrorString = '';
-	
-	protected $DontGenerateJumpURL = True;
+	protected $AllowedCalendars = array();
 		
 	/**
     * generate Module
@@ -55,7 +60,7 @@ class ModuleEventEditor extends Events {
 	public function generate()
     {
         if (TL_MODE == 'BE') {
-            $objTemplate = new BackendTemplate('be_wildcard');
+            $objTemplate = new \BackendTemplate('be_wildcard');
             $objTemplate->wildcard = '### EVENT EDITOR ###';
             $objTemplate->title = $this->headline;
             $objTemplate->id = $this->id;
@@ -72,16 +77,36 @@ class ModuleEventEditor extends Events {
         return parent::generate();
     }
 	
+		
+	/**
+	* Returns an Event-URL for a given Event-Editor and a given Event 	
+	**/
+	public function GetEditorFrontendURLForEvent($EventObj) 
+	{	
+		// get the JumpTo-Page for this calendar			
+		$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=(SELECT jumpTo FROM tl_calendar WHERE id=?)")
+								  ->limit(1)
+								  ->execute($EventObj->pid);
+		if ($objPage->numRows) {
+			if ($GLOBALS['TL_CONFIG']['useAutoItem']) {
+				$showUrl = $this->generateFrontendUrl($objPage->row(), '/%s');
+			} else {
+				$showUrl = $this->generateFrontendUrl($objPage->row(), '/events/%s');
+			}
+		}
+		else {
+			$showUrl = $this->Environment->request;
+		}			
+		return $this->generateEventUrl($EventObj, $showUrl);
+	}
+	
 	
 
     /**
      * add the selected TinyMCE into the header of the page
      */
-    public function addTinyMCE($str)
-    {
-		
+    public function addTinyMCE($str) {
         if (!empty($str)) {
-            //$strFile = sprintf('%s/system/config/%s.php', TL_ROOT, $str);
 			$strFile = sprintf('%s/vendor/danielgausi/contao-calendareditor-bundle/src/Resources/contao/tinyMCE/%s.php', TL_ROOT, $str);
 					
             $this->rteFields = 'ctrl_details,ctrl_teaser,teaser';
@@ -90,7 +115,6 @@ class ModuleEventEditor extends Events {
             if (file_exists(TL_ROOT . '/assets/tinymce4/js/langs/' . $GLOBALS['TL_LANGUAGE'] . '.js')) {
                 $this->language = $GLOBALS['TL_LANGUAGE'];
             }
-
             if (!file_exists($strFile)) {
                 echo (sprintf('Cannot find rich text editor configuration file "%s"', $strFile));
             }else {			
@@ -101,113 +125,63 @@ class ModuleEventEditor extends Events {
             }
         }
     }
-
-	public function UserIsToAddCalendar($user, $pid)
-	{
-		$objCalendar = $this->Database->prepare("SELECT * FROM tl_calendar WHERE id=?")
-										->limit(1)
-										->execute($pid);
-		if ($objCalendar->numRows < 1) {
-            return false;
-		} else {
-			return (UserIsAuthorizedUser($objCalendar, $user));
-		}
-	}
 	
-
-    /**
+	/**
      * Get the calendars the user is allowed to edit
      * These calendars will appear in the selection-field in the edit-form (if there is not only one)
      */
-    public function getCalendars($user)
-    {
-        $calendars = array();
-
-        foreach ($this->cal_calendar as $currCal) {
-            $objCalendar = $this->Database->prepare("SELECT * FROM tl_calendar WHERE id=?")->limit(1)->execute($currCal);
-            //if ($this->IsUserAllowedToEditCalendar($user, $objCalendar)) {
-			if (UserIsAuthorizedUser($objCalendar, $user)) {
-                $calendars[] = array(
-                    'id' => $objCalendar->id,
-                    'name' => $objCalendar->title);
-            }
-        }
-        return($calendars);
-    }
+    public function getCalendars($user) {       
+		// get all the calendars supported by this module
+		$objCalendars = CalendarModelEdit::findByIds($this->cal_calendar);
+		// Check these calendars, whether the current user is allowed to edit them
+		$calendars = array();
 		
-    /**
-     * check, whether the user is allowed to edit the specified Event
-     * This is called when the user has general access to at least one calendar
-     * But: We need to check whether he is allowed to edit this special event
-     *       - is he in the group/admingroup in the event's calendar?
-     *       - is he the owner of the event or !caledit_onlyUser
-     */
-    public function checkUserEditRights($user, $eventID, $CurrentObjectData)
-    {
-        // if no event is specified: ok, FE user can add new events :D
-        if (!$eventID) {
-            return true;
-        }
-        // get the calendar of the event
-		$cpid = $CurrentObjectData->pid;
-        $objCalendar = $this->Database->prepare("SELECT * FROM tl_calendar WHERE id=?")->limit(1)->execute($cpid);
-        if ($objCalendar->numRows < 1) {
-			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_unexpected']; 
-            return false; // Event not found or something else is wrong
-        }
-        // check calendar settings (just as in getCalendars)        
-		if (UserIsAuthorizedUser($objCalendar, $user)) {
-            // ok, user is allowed to edit events here.
-            // however, he is not necessary the owner of the event.
-            //if ($CurrentObjectData->numRows < 1) {
-			//	$this->ErrorString = $CurrentObjectData->id.'sdssddsd'.$GLOBALS['TL_LANG']['MSC']['caledit_unexpected']; 
-            //    return false; // Event not found or something else is wrong
-            //}
-            // if the editing is disabled in the BE: Deny editing in the FE
-            if ($CurrentObjectData->disable_editing) {
-				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_DisabledEvent'];				
-                return false;
-            }
-						
-			$userIsAdmin = UserIsAdmin($objCalendar, $user);
-			if (!$userIsAdmin && 
-			  ($CurrentObjectData->startTime <= time()) && ($objCalendar->caledit_onlyFuture)			  
-			  ){
-				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoPast'];				
-				return false;
-			  }
-
-			$result = ((!$objCalendar->caledit_onlyUser) ||                
-				( (FE_USER_LOGGED_IN) && ( $userIsAdmin  || ($user->id == $CurrentObjectData->fe_user)) )                
-				);
-			if (!$result) {
-				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_OnlyUser'];
+		if (null === $objCalendars) {
+			// return the empty array
+			return $calendars;
+		} else {
+			// fill the Allowed-Calendars-Array with proper calendars 
+			foreach($objCalendars as $objCalendar) {
+				if (UserIsAuthorizedUser($objCalendar, $user)) {
+					$calendars[] = $objCalendar;
+				}
 			}
-				
-			return $result;
-        }else {
-			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed']; 
-            return false; // user is not allowed to edit events here
-        }
+		}		
+		return $calendars;
     }
-
 	
-	public function checkValidDate($calendarID, $newDate, $objWidget)
-	{		
-		// get selected calendar 
-		$objCalendar = $this->Database->prepare("SELECT * FROM tl_calendar WHERE id=?")
-                         			->limit(1)
-									->execute($calendarID);
-		
-		if ($objCalendar->numRows < 1) {			
-			return false; 
+	
+	/**
+		Check user rights for editing on different stages of the formular		
+		The first step is always to get an Calendar-object frome the array of calendars by the 
+		current events Pid (= the ID of the calendar)
+	**/
+	public function  getCalendarObjectFromPID($pid) {
+		foreach($this->$AllowedCalendars as $objCalendar) {
+			if ($pid == $objCalendar->id) {
+				return $objCalendar;
+			}
+		}		
+	}
+	
+	public function UserIsToAddCalendar($user, $pid) {
+		$objCalendar = $this->getCalendarObjectFromPID($pid);
+		if (NULL === $objCalendar) {
+            return false;
+		} else {
+			return UserIsAuthorizedUser($objCalendar, $user);
+		}
+	}
+	
+	public function checkValidDate($calendarID, $newDate, $objWidget) {		
+		$objCalendar = $this->getCalendarObjectFromPID($calendarID);
+		if (NULL === $objCalendar) {
+			return false;
 		}
 		
-		if ((!$objCalendar->caledit_onlyFuture) || 			
-			UserIsAdmin($objCalendar, $this->User)
-			) {		
+		if ((!$objCalendar->caledit_onlyFuture) || UserIsAdmin($objCalendar, $this->User)) {		
 			// elapsed events can be edited, or user is an admin
-				return true;
+			return true;
 		} else {
 			// editing elapsed events is denied and user is not an admin			
 			$isValid = ($newDate >= time());
@@ -219,39 +193,64 @@ class ModuleEventEditor extends Events {
 	}
 	
 	public function allDatesAllowed($calendarID) {
-		// get selected calendar 
-		$objCalendar = $this->Database->prepare("SELECT * FROM tl_calendar WHERE id=?")
-                         			->limit(1)
-									->execute($calendarID);
-		if ($objCalendar->numRows < 1) {			
-			return false; 
+		$objCalendar = $this->getCalendarObjectFromPID($calendarID);
+		if (NULL === $objCalendar) {
+			return false;
 		}
 		
-		if ((!$objCalendar->caledit_onlyFuture) || 
-			(UserIsAdmin($objCalendar, $this->User))
-			) {		
+		if ((!$objCalendar->caledit_onlyFuture) || (UserIsAdmin($objCalendar, $this->User)) ) {
 			// elapsed events can be edited, or user is an admin
 			return true;
 		} else {
 			return false;
 		}
 	}
-
     
-    public function generateAlias($varValue, $newID)
-    {
-		// Generate new alias from varvalue (here: the title)
-		$varValue = standardize($varValue);
 		
-		$objAlias = $this->Database->prepare("SELECT id FROM tl_calendar_events WHERE alias=?")
-						->execute($varValue);
-				 
-		// Add ID to alias, if it already exists
-		if ($objAlias->numRows) {
-			$varValue .= '-' . $newID;
-		}		
-		return $varValue;
-    }
+    /**
+     * check, whether the user is allowed to edit the specified Event
+     * This is called when the user has general access to at least one calendar
+     * But: We need to check whether he is allowed to edit this special event
+     *       - is he in the group/admingroup in the event's calendar?
+     *       - is he the owner of the event or !caledit_onlyUser
+	 * used in the compile-method at the beginning
+     */
+    public function checkUserEditRights($user, $eventID, $CurrentObjectData) {
+        // if no event is specified: ok, FE user can add new events :D
+        if (!$eventID) {
+            return true;
+        }		
+		$objCalendar = $this->getCalendarObjectFromPID($CurrentObjectData->pid);
+		if (NULL === $objCalendar) {
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_unexpected'].$CurrentObjectData->pid; 
+			return false; // Event not found or something else is wrong
+        }
+		
+        // check calendar settings 
+		if (UserIsAuthorizedUser($objCalendar, $user)) {            
+            // if the editing is disabled in the BE: Deny editing in the FE
+            if ($CurrentObjectData->disable_editing) {
+				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_DisabledEvent'];				
+                return false;
+            }
+						
+			$userIsAdmin = UserIsAdmin($objCalendar, $user);
+			if (!$userIsAdmin && ($CurrentObjectData->startTime <= time()) && ($objCalendar->caledit_onlyFuture)){
+				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoPast'];				
+				return false;
+			  }
+
+			$result = ((!$objCalendar->caledit_onlyUser) || ((FE_USER_LOGGED_IN) && ( $userIsAdmin  || ($user->id == $CurrentObjectData->fe_user)) ) );
+			if (!$result) {
+				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_OnlyUser'];
+			}
+				
+			return $result;
+        }else {
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed']; 
+            return false; // user is not allowed to edit events here
+        }
+    }    
 	
 	public function GenerateJump($userSetting, $DBid, $PID) {
 		switch ($userSetting) {
@@ -273,35 +272,11 @@ class ModuleEventEditor extends Events {
 				$this->redirect($jt, 301);
 				break;
 				
-			case "view":
-				//$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($DBid);
-				// uuuuuuuuuuuuuuuuuuuuuuuuuuu				
-						
+			case "view":			
+				$currentEventObject = CalendarEventsModelEdit::findByIdOrAlias($DBid);
 				
-				$currentEventObject = \CalendarEventsModel::findPublishedByParentAndIdOrAlias($DBid, array($PID));
-				if (is_null($currentEventObject)) {
-					// something is wong (probably a hidden event)
-					$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($DBid);					
-				}
-				
-				if ($currentEventObject->published) {
-					// get the JumpTo-Page for this calendar			
-					
-					$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=(SELECT jumpTo FROM tl_calendar WHERE id=?)")
-								  ->limit(1)
-								  ->execute($currentEventObject->pid);
-
-					if ($objPage->numRows) {
-						if ($GLOBALS['TL_CONFIG']['useAutoItem']) {
-							$showUrl = $this->generateFrontendUrl($objPage->row(), '/%s');
-						} else {
-							$showUrl = $this->generateFrontendUrl($objPage->row(), '/events/%s');
-						}
-					} else {
-						$showUrl = $this->Environment->request;
-					}
-					
-					$jt = $this->generateEventUrl($currentEventObject, $showUrl);					
+				if ($currentEventObject->published) {					
+					$jt = $this->GetEditorFrontendURLForEvent($currentEventObject);
 					$this->redirect($jt, 301);			
 				} else {
 					// event is not published, so show it in the editor again
@@ -326,8 +301,7 @@ class ModuleEventEditor extends Events {
 	}
     
 	
-	public function getContentElements($eventID, &$contentID, &$contentData) 
-	{
+	public function getContentElements($eventID, &$contentID, &$contentData) {
 		// get Content Elements
 		$objElement = \ContentModel::findPublishedByPidAndTable($eventID, 'tl_calendar_events');
 			
@@ -356,9 +330,9 @@ class ModuleEventEditor extends Events {
 			}
 		}
 	}
+
 	
-	public function getEventInformation($currentEventObject, &$NewEventData) 
-	{
+	public function getEventInformation($currentEventObject, &$NewEventData) {
 		// Fill fields with data from $currentEventObject
 		$NewEventData['startDate'] = $currentEventObject->startDate;			
 		$NewEventData['endDate']   = $currentEventObject->endDate;		
@@ -379,61 +353,77 @@ class ModuleEventEditor extends Events {
 		$NewEventData['pid']       = $currentEventObject->pid;			
 		$NewEventData['published'] = $currentEventObject->published;	
 		$NewEventData['alias']     = $currentEventObject->alias;
-			
-		// get the JumpTo-Page for this calendar			
-		$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=(SELECT jumpTo FROM tl_calendar WHERE id=?)")
-								  ->limit(1)
-								  ->execute($currentEventObject->pid);
-
-		if ($objPage->numRows) {
-			if ($GLOBALS['TL_CONFIG']['useAutoItem']) {
-				$showUrl = $this->generateFrontendUrl($objPage->row(), '/%s');
-			} else {
-				$showUrl = $this->generateFrontendUrl($objPage->row(), '/events/%s');
-			}
-		} else {
-			$showUrl = $this->Environment->request;
-		}			
-		$this->Template->CurrentTitle = $currentEventObject->title;
-		$this->Template->CurrentDate = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $currentEventObject->startDate);
-					
-		if ($this->DontGenerateJumpURL) {
-				$this->Template->CurrentEventLink = '';
-		} else {
-			$this->Template->CurrentEventLink = $this->generateEventUrl($currentEventObject, $showUrl);
-		}
+		
+		$this->Template->CurrentTitle     = $currentEventObject->title;
+		$this->Template->CurrentDate      = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $currentEventObject->startDate);
 		$this->Template->CurrentPublished = $currentEventObject->published;
-		if ($currentEventObject->published == '1') {
+		
+		if ($currentEventObject->published) {			
+			$this->Template->CurrentEventLink     = $this->GetEditorFrontendURLForEvent($currentEventObject);
 			$this->Template->CurrentPublishedInfo = $GLOBALS['TL_LANG']['MSC']['caledit_publishedEvent'];
-		} 
-		else {
+		} else {
+			$this->Template->CurrentEventLink     = '';
 			$this->Template->CurrentPublishedInfo = $GLOBALS['TL_LANG']['MSC']['caledit_unpublishedEvent'];
 		}
 	}
+	
+	public function AliasExists($suggestedAlias) {
+		$objAlias = $this->Database->prepare("SELECT id FROM tl_calendar_events WHERE alias=?")
+						 ->execute($suggestedAlias);
+		if ($objAlias->numRows) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	 
+	public function generateAlias($varValue) {
+		// Generate new alias from varValue (here: the title)
+		
+		// hier noch arbeiten mit string substr ( string $string , int $start [, int $length ] )
+		//, um unter der maximale länge von alias zu bleiben? ggf. maximale länge -5, um 
+		// noch ein sinnvolles Polster (bis zu 9999 Events) für den ID-Suffix zu haben?
+		
+		$varValue = standardize($varValue);		
+
+		if ($this->AliasExists($varValue)) {
+			// alias already exists, we have to modify it.
+			// 1st try: Add the ID of the event (which is currently not in the DB, therefore +1 at the end)
+			$maxI = $this->Database->prepare("SELECT MAX(id) as id FROM tl_calendar_events")
+						 ->limit(1)
+						 ->execute();
+			$newID = $maxI->id + 1;
+			
+			$varValue .= '-'.$newID;
+			// if even this modified alias exists: use random alias, with ID as prefix
+			// we do not increase the ID here, nor do we add another random number,
+			// as there may be some issues with the maximum length of the alias (?)
+			while ($this->AliasExists($varValue)) {				
+				$randID = mt_rand();
+				$varValue = $newID.'-'.$randID;
+			}
+		}		
+		return $varValue;
+	}
 	 
-	public function PutIntoDB($eventData, $OldId, $contentData, $OldContentID)
-    {        
+	public function PutIntoDB($eventData, $OldId, $contentData, $OldContentID) {        
 		// get current max. ID in tl_calendar_events (needed for new alias)
-		$maxI = $this->Database->prepare("SELECT MAX(id) as id FROM tl_calendar_events")
-								->limit(1)
-								->execute();
-		$newID = $maxI->id + 1;
+		//$maxI = $this->Database->prepare("SELECT MAX(id) as id FROM tl_calendar_events")
+		//						->limit(1)
+		//						->execute();
+		//$newID = $maxI->id + 1;
 		
 		$returnID = 0;
 		
-
 		if (!$OldId) {
 			// create new alias
-			$alias = $this->generateAlias($eventData['title'], $newID);
-		}
-		else {
+			$eventData['alias'] = $this->generateAlias($eventData['title']);    //, $newID);
+		} 	
+		//else {
 			// use existing alias
-			$alias = $eventData['alias'];
-		}		
-		
-		
-		$eventData['alias'] = $alias;
+		//	$alias = $eventData['alias'];
+		//}		
+		//$eventData['alias'] = $alias;
 		
 		// important (otherwise details/teaser will be mixed up in calendars or event lists)		
 		$eventData['source'] = 'default';
@@ -443,7 +433,7 @@ class ModuleEventEditor extends Events {
 		//$det = str_replace($search, $replace, $contentData['text']);
 		
 		// needed later!		
-		$startDate = new Date($eventData['startDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
+		$startDate = new \Date($eventData['startDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
 		
 		$eventData['tstamp']  = $startDate->tstamp;
 		// $contentData['text'] = $det;
@@ -452,7 +442,7 @@ class ModuleEventEditor extends Events {
 			if (trim($eventData['endDate']) != '') {
 				// an enddate is given
 				$endDateStr = $eventData['endDate'];				
-				$endDate = new Date($eventData['endDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
+				$endDate = new \Date($eventData['endDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
 				$eventData['endDate'] = $endDate->tstamp;
 			}
 			else {
@@ -474,7 +464,7 @@ class ModuleEventEditor extends Events {
 				$useTime = true;				
 				$eventData['addTime'] = '1';				
 				$s = $eventData['startDate'] . ' ' . $eventData['startTime'];
-				$startTime = new Date($s, $GLOBALS['TL_CONFIG']['dateFormat'].' '.$GLOBALS['TL_CONFIG']['timeFormat']  );
+				$startTime = new \Date($s, $GLOBALS['TL_CONFIG']['dateFormat'].' '.$GLOBALS['TL_CONFIG']['timeFormat']  );
 				$eventData['startTime'] = $startTime->tstamp;
 			}
 			
@@ -484,7 +474,7 @@ class ModuleEventEditor extends Events {
 			if (trim($eventData['endTime']) == '') {
 					// if no endtime is given: set endtime = starttime
 					$s = $endDateStr . ' ' . $startTimeStr;
-					$endTime = new Date($s, $GLOBALS['TL_CONFIG']['datimFormat']);
+					$endTime = new \Date($s, $GLOBALS['TL_CONFIG']['datimFormat']);
 					$eventData['endTime'] = $endTime->tstamp;
 			}
 			else {
@@ -492,7 +482,7 @@ class ModuleEventEditor extends Events {
 						$eventData['endTime'] = strtotime($endDateStr.' '.$eventData['endTime']);
 					}				
 					$s = $endDateStr . ' ' . $eventData['endTime'];
-					$endTime = new Date($s, $GLOBALS['TL_CONFIG']['datimFormat']);
+					$endTime = new \Date($s, $GLOBALS['TL_CONFIG']['datimFormat']);
 					$eventData['endTime'] = $endTime->tstamp;	
 			}
 			
@@ -547,11 +537,10 @@ class ModuleEventEditor extends Events {
     }
 	
 	
-	protected function HandleEdit($editID, $currentEventObject, $AllowedCalendars) {
+	protected function HandleEdit($editID, $currentEventObject) {
 		$this->strTemplate = $this->caledit_template;
 		
         $this->Template = new \FrontendTemplate($this->strTemplate);
-				
 		
 		// 1. Get Data from post/get
 		$newDate = $this->Input->get('add');
@@ -622,13 +611,12 @@ class ModuleEventEditor extends Events {
 				return ;
 			}
 						
-			
 			if (empty($NewEventData['pid'])) {
 				// set default value 				
-				$NewEventData['pid'] = $AllowedCalendars[0]['id'];				
+				$NewEventData['pid'] = $this->$AllowedCalendars[0]->id; //['id'];				
 			};
 						
-			if (!$this->UserIsToAddCalendar($this->User, $NewEventData['pid'])){
+			if (  !$this->UserIsToAddCalendar($this->User, $NewEventData['pid'])  ){
 				// this should never happen, except the FE user is manipulating
 				// the POST with some evil HackerToolz. ;-)
 				$fatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'];
@@ -650,7 +638,7 @@ class ModuleEventEditor extends Events {
 			'label' => $GLOBALS['TL_LANG']['MSC']['caledit_startdate'],
 			'inputType' => 'text',
 			'value' => $NewEventData['startDate'],
-			'eval' => array('rgxp' => 'date', 'mandatory' => true)
+			'eval' => array('rgxp' => 'date', 'mandatory' => true, 'datepicker'=>true)
 			);
 
 		$fields['endDate'] = array(
@@ -709,13 +697,13 @@ class ModuleEventEditor extends Events {
 			'eval' => array('mandatory' => $mandDetails, 'rte' => 'tinyMCE', 'allowHtml' => true)
 			);
 						
-		if (count($AllowedCalendars) > 1) {
+		if (count($this->$AllowedCalendars) > 1) {
 			// Show allowed Calendars in a select-field
 			$pref = array();
 			$popt = array();
-			foreach ($AllowedCalendars as $cal) {
-				$popt[] = $cal['id'];
-				$pref[$cal['id']] = $cal['name'];
+			foreach ($this->$AllowedCalendars as $cal) {				
+				$popt[] = $cal->id;
+				$pref[$cal->id] = $cal->title;				
 			}
 			$fields['pid'] = array(
 				'name' => 'pid',
@@ -837,7 +825,7 @@ class ModuleEventEditor extends Events {
 				$rgxp = $arrField['eval']['rgxp'];			
 				if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $arrField['value'] != '')
 				{
-					$objDate  = new Date($varValue, $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+					$objDate  = new \Date($varValue, $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
 					$arrField['value'] = $objDate->tstamp;
 				}
 			}
@@ -863,7 +851,7 @@ class ModuleEventEditor extends Events {
 		}	
 									
 		$this->Template->submit = $GLOBALS['TL_LANG']['MSC']['caledit_saveData'];
-		$this->Template->calendars = $AllowedCalendars;
+		$this->Template->calendars = $this->$AllowedCalendars;
 		
 		if ((!$doNotSubmit) && ($this->Input->post('FORM_SUBMIT') == 'caledit_submit')){
 			// everything seems to be ok, so we can add the POST Data
@@ -902,7 +890,9 @@ class ModuleEventEditor extends Events {
 			// Do NOT Submit
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$this->Template->InfoClass = 'tl_error';
-				$this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'];	
+				if ($this->Template->InfoMessage == '') {
+					$this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'];
+				} // else: keep the InfoMesage as set before
 			} 
 			$this->Template->fields = $arrWidgets;
         }    
@@ -936,24 +926,13 @@ class ModuleEventEditor extends Events {
 		$pid = $currentEventObject->pid;			
 		$id  = $currentEventObject->id;
 		$published = $currentEventObject->published;			
-		// get the JumpTo-Page for this calendar			
-		$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=(SELECT jumpTo FROM tl_calendar WHERE id=?)")
-								  ->limit(1)
-								  ->execute($pid);
-									  
-		if ($objPage->numRows) {
-			if ($GLOBALS['TL_CONFIG']['useAutoItem']) {
-				$showUrl = $this->generateFrontendUrl($objPage->row(), '/%s');
-			} else {
-				$showUrl = $this->generateFrontendUrl($objPage->row(), '/events/%s');
-			}
-		}
-		else {
-			$showUrl = $this->Environment->request;
-		}			
+						
+		$this->Template->CurrentEventLink = $this->GetEditorFrontendURLForEvent($currentEventObject);
+		
+		
 		$this->Template->CurrentTitle = $currentEventObject->title;
 		$this->Template->CurrentDate = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $currentEventObject->startDate);
-		$this->Template->CurrentEventLink = $this->generateEventUrl($currentEventObject, $showUrl);
+		
 		if ($published == '') {
 			$this->Template->CurrentPublishedInfo = $GLOBALS['TL_LANG']['MSC']['caledit_unpublishedEvent'];
 		} 
@@ -1018,15 +997,14 @@ class ModuleEventEditor extends Events {
 			// Do NOT Submit
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$this->Template->InfoClass = 'tl_error';
-				$this->Template->InfoMessage = 'Ein Fehler ist aufgetreten.';							
+				$this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'];					
 			} 
 			$this->Template->fields = $arrWidgets;        
         }		
 		$this->Template->fields = $arrWidgets;
 	}
 	
-	protected function HandleClone($currentEventObject) 
-	{
+	protected function HandleClone($currentEventObject)  {
 		$this->strTemplate = $this->caledit_clone_template;
         $this->Template = new \FrontendTemplate($this->strTemplate);
 		
@@ -1133,10 +1111,8 @@ class ModuleEventEditor extends Events {
 		);
 			
 		// here: CALL Hooks with $NewEventData, $currentEventObject, $fields		
-		if (array_key_exists('buildCalendarCloneForm', $GLOBALS['TL_HOOKS']) && is_array($GLOBALS['TL_HOOKS']['buildCalendarCloneForm']))
-		{
-			foreach ($GLOBALS['TL_HOOKS']['buildCalendarCloneForm'] as $key => $callback)
-			{
+		if (array_key_exists('buildCalendarCloneForm', $GLOBALS['TL_HOOKS']) && is_array($GLOBALS['TL_HOOKS']['buildCalendarCloneForm'])) {
+			foreach ($GLOBALS['TL_HOOKS']['buildCalendarCloneForm'] as $key => $callback) {
 				$this->import($callback[0]);
 				$arrResult = $this->{$callback[0]}->{$callback[1]}($newDates, $fields, $currentEventObject, $currentID);
 				if (is_array($arrResult) && count($arrResult) > 1) {
@@ -1253,8 +1229,7 @@ class ModuleEventEditor extends Events {
 	}
 	
 	
-	protected function SendNotificationMail($NewEventData, $editID, $User, $cloneDates) 
-	{
+	protected function SendNotificationMail($NewEventData, $editID, $User, $cloneDates)  {
 		$Notification = new Email();
 		$Notification->from = $GLOBALS['TL_ADMIN_EMAIL'];
 		
@@ -1332,50 +1307,27 @@ class ModuleEventEditor extends Events {
 		$fatalError = False;
 				
         $this->import('FrontendUser', 'User');
-        $AllowedCalendars = $this->getCalendars($this->User);			
-        if (count($AllowedCalendars) == 0) {
+        $this->$AllowedCalendars = $this->getCalendars($this->User);			
+        if (count($this->$AllowedCalendars) == 0) {
 			$fatalError = True;				
 			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'];
-        } else {			
-			//$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($editID);           
-			// uuuuuuuuuuuuuuuuu
-            
-			$calIDs = array();
-			foreach ($AllowedCalendars as $aCal) {
-					$calIDs[] = $aCal['id'];
-			}
-						
-			//$currentEventObject = findPublishedByParentAndIdOrAliass($editID, $calIDs);
-			$currentEventObject = \CalendarEventsModel::findPublishedByParentAndIdOrAlias($editID, $calIDs);
-			if (is_null($currentEventObject)) {
-				// something is wong (probably a hidden event)
-				$currentEventObject = $this->Database->prepare("SELECT * FROM tl_calendar_events WHERE id=?")->limit(1)->execute($editID);
-				$AuthorizedUser = (bool) $this->checkUserEditRights($this->User, $editID, $currentEventObject);
-				if (!$AuthorizedUser) {
-					// a proper ErrorString is set in checkUserEditRights
-					$fatalError = True; 				
-				}
-				$this->DontGenerateJumpURL = True;
-			} else
-			{
-				$this->DontGenerateJumpURL = False;
-				$AuthorizedUser = (bool) $this->checkUserEditRights($this->User, $editID, $currentEventObject);
-				if (!$AuthorizedUser) {
-					// a proper ErrorString is set in checkUserEditRights
-					$fatalError = True; 				
-				}
+        } else {						
+			$currentEventObject = CalendarEventsModelEdit::findByIdOrAlias($editID);
+			
+			$AuthorizedUser = (bool) $this->checkUserEditRights($this->User, $editID, $currentEventObject);
+			if (!$AuthorizedUser) {
+				// a proper ErrorString is set in checkUserEditRights
+				$fatalError = True; 					
 			}
 		}
-        	
 
 		// Fatal error, editing not allowed, abort.
         if ($fatalError) {         
 			$this->strTemplate = $this->caledit_template;
 			$this->Template = new \FrontendTemplate($this->strTemplate);
-            $this->Template->FatalError = $this->ErrorString.'sdssddsd';			
+            $this->Template->FatalError = $this->ErrorString; 
             return ;
         }
-
 		
 		// ok, the user is an authorized user		
 		if ($deleteID) {
@@ -1388,7 +1340,7 @@ class ModuleEventEditor extends Events {
 			return ;
 		}
 		
-		$this->HandleEdit($editID, $currentEventObject, $AllowedCalendars);
+		$this->HandleEdit($editID, $currentEventObject);
 		return;
 		
 	}	

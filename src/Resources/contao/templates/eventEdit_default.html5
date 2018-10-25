@@ -3,7 +3,9 @@
 <<?php echo $this->hl; ?>><?php echo $this->headline; ?></<?php echo $this->hl; ?>>
 <?php endif; ?>
 
-<?php echo $this->InfoMessage; ?>
+<p class="error">
+	<?php echo $this->InfoMessage; ?>
+</p>
 
 <h2> <?php echo $GLOBALS['TL_LANG']['MSC']['caledit_currentActionEdit']; ?></h2>
 
