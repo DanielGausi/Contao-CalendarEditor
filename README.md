@@ -87,6 +87,6 @@ Note that an "edit link" is only added to the template, if the user is actually 
 
 If you like this extension and think it's worth a little donation: You can support me via Paypal.Me:
 
-[Donation for CalendarEditor](https://paypal.me/CalendarEditor)
+[Donation for CalendarEditor](https://paypal.me/CalendarEditor/10)
 
 Thank You!
