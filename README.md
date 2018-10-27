@@ -15,7 +15,7 @@ New setting in the Contao Events
 
 ### The Event-Editor module
 
-A simple formular for the Contao Frontend. The Frontend-User can
+A simple form for the Contao Frontend. The Frontend-User can
 * add new events
 * edit existing events
 * optional: "Save as" while editing existing events to create a copy of the event
@@ -47,3 +47,36 @@ Should be placed on the site with the Eventreader module. Provides a proper edit
 ### The Calendar FE edit module
 
 Similar to the regular Contao Calendar, but with edit-Links and "add event"-Links for every day. As a bonus, a "Holiday Calendar" can be specified. Events from this calendar are shown in the day-header of the calender module, to mark some days as "holiday", or whatever.
+
+## Usage
+
+Just an overview here.
+
+Preliminaries:
+* create 3 pages for Calendar/Eventlist, Eventreader and EventEditor
+* specify Member groups that are allowed to edit events in the Frontend
+* create a Calendar (or open the settings for an existing one), enable Frontend editing and select the redirect page for editing and specify authorized member groups
+
+### The Event Editor module
+Now we can create a new Module of type "Event Editor". 
+
+The redirect page defines the page, where the user is redirected to after the formular is submitted succesfully. The FE user may overwrite this by a selection of some other pages (show the new event in Eventreader, show it in Eventeditor again, create a new Event or duplicate the event the user just created).
+
+The Backend user can specify some more settings here, which should be self-explaining. Just as in the Eventreader module a list of Calendars must be set where this module has access to.
+
+There can als be set some more mandatory fields, which the FE user must fill in in the form.
+
+To keep it simple, the field "CSS value" can be renamed into something the FE user may understand more easily. This depends on how CSS values are used in the calendar on your website. You can also add a list of predefined CSS values/labels.
+
+For entering dates more comfortable, a jQuery Datepicker can be added to the form.
+
+This module should then be included in the Article on the Editor page you selected in the Calendar(s) before.
+
+### Provide "edit links" to the Frontend user
+
+If a user is authorized to edit events, he or she should be provided with some links to click on to edit these events. To update an existing website you should
+
+* replace a Calendar module with the Calendar FE module. This adds also "add links" for every day. If you don't need "add event links", you may also edit the existing calendar template
+* Change the templates of Eventlist modules to one of the "\_edit" templates (edit these templates to see how it works). 
+
+Note that an "edit link" is only added to the template, if the user is actually authorized to edit this event. 
