@@ -1,13 +1,19 @@
 <?php 
 
 /**
+ * This file is part of 
+ * 
+ * CalendarEditorBundle
+ * @copyright  Daniel Gaußmann 2018
+ * @author     Daniel Gaußmann (Gausi) 
+ * @package    Calendar_Editor
+ * @license    LGPL-3.0-or-later
+ * @see        https://github.com/DanielGausi/Contao-CalendarEditor
+ *
+ * an extension for
  * Contao Open Source CMS
- * Copyright (C) 2005-2010 Leo Feyer
-  *
- * @copyright  Daniel Gaussmann 2011-2018
- * @author     Daniel Gaussmann <mail@gausi.de> 
- * @package    CalendarEditor
- * @license    GNU/LGPL
+ * (c) Leo Feyer, LGPL-3.0-or-later
+ *
  */
 
 

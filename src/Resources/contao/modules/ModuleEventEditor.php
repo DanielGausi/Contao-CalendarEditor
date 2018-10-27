@@ -1,38 +1,27 @@
 <?php 
 
 /**
+ * This file is part of 
+ * 
+ * CalendarEditorBundle
+ * @copyright  Daniel Gaußmann 2018
+ * @author     Daniel Gaußmann (Gausi) 
+ * @package    Calendar_Editor
+ * @license    LGPL-3.0-or-later
+ * @see        https://github.com/DanielGausi/Contao-CalendarEditor
+ *
+ * an extension for
  * Contao Open Source CMS
- * Copyright (C) 2005-2010 Leo Feyer
+ * (c) Leo Feyer, LGPL-3.0-or-later
  *
- * Formerly known as TYPOlight Open Source CMS.
- *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program. If not, please visit the Free
- * Software Foundation website at <http://www.gnu.org/licenses/>.
- *
- * PHP version 5
- *
- * @copyright  Daniel Gaussmann 2011-2018
- * @author     Daniel Gaussmann <mail@gausi.de>
- * @package    CalendarEditor
- * @license    GNU/LGPL
  */
 
 /**
  * Class ModuleEventEditor
  */
  
-namespace DanielGausi\CalendarEditorBundle;		  
+namespace DanielGausi\CalendarEditorBundle;	
+		  
 
 use Contao\Calendar;
 use Contao\CalendarModel;
@@ -367,6 +356,26 @@ class ModuleEventEditor extends \Events {
 		}
 	}
 	
+	public function addDatePicker(&$field) {
+		$field['inputType'] = 'calendarfield';
+		if (strlen($this->caledit_dateIncludeCSSTheme) > 0) {
+			$field['eval']['dateIncludeCSS'] = '1';
+			$field['eval']['dateIncludeCSSTheme'] = $this->caledit_dateIncludeCSSTheme;			
+		} else {
+			$field['eval']['dateIncludeCSS'] = '0';
+			$field['eval']['dateIncludeCSSTheme'] = '';						
+		}
+		$field['eval']['dateDirection'] = $this->caledit_dateDirection;
+		if ($this->caledit_dateImage) {
+			$field['eval']['dateImage'] = '1';			
+		}
+		if ($this->caledit_dateImageSRC) {
+			$field['eval']['dateImageSRC'] = $this->caledit_dateImageSRC;			
+		}
+		
+		
+	}
+	
 	public function AliasExists($suggestedAlias) {
 		$objAlias = $this->Database->prepare("SELECT id FROM tl_calendar_events WHERE alias=?")
 						 ->execute($suggestedAlias);
@@ -378,13 +387,9 @@ class ModuleEventEditor extends \Events {
 	}
 	 
 	public function generateAlias($varValue) {
-		// Generate new alias from varValue (here: the title)
-		
-		// hier noch arbeiten mit string substr ( string $string , int $start [, int $length ] )
-		//, um unter der maximale länge von alias zu bleiben? ggf. maximale länge -5, um 
-		// noch ein sinnvolles Polster (bis zu 9999 Events) für den ID-Suffix zu haben?
-		
-		$varValue = standardize($varValue);		
+		// maximum length of alias in the DB: 128 chars
+		// we use only 110 chars here, as we may add "-<ID>" in case of a collision		
+		$varValue = substr(standardize($varValue), 0, 110);
 
 		if ($this->AliasExists($varValue)) {
 			// alias already exists, we have to modify it.
@@ -624,6 +629,10 @@ class ModuleEventEditor extends \Events {
 				return ;
 			}
 		}
+		
+		//$GLOBALS['TL_JAVASCRIPT'][] = 'assets/jquery-ui/js/jquery-ui.min.js';
+		//$GLOBALS['TL_JAVASCRIPT'][] = 'assets/hofff/calendarfield/jquery-ui.datepicker/js/widgets/datepicker.min.js';
+		//$GLOBALS['TL_JAVASCRIPT'][] = 'assets/hofff/calendarfield/jquery-ui.datepicker/js/i18n/datepicker-de.js';
 				
 		$mandfields = deserialize($this->caledit_mandatoryfields);
 		$mandTeaser = (is_array($mandfields) && array_intersect(array('teaser') , $mandfields));
@@ -636,9 +645,15 @@ class ModuleEventEditor extends \Events {
 		$fields['startDate'] = array(
 			'name' => 'startDate',
 			'label' => $GLOBALS['TL_LANG']['MSC']['caledit_startdate'],
-			'inputType' => 'text',
+			'inputType' => 'text', // or: 'calendarfield', 
 			'value' => $NewEventData['startDate'],
-			'eval' => array('rgxp' => 'date', 'mandatory' => true, 'datepicker'=>true)
+			'eval' => array('rgxp' => 'date', 
+					'mandatory' => true, 
+					'decodeEntities' => true)
+					//'dateImage' => '1', 
+					//'dateIncludeCSS' => '1',
+					//'dateIncludeCSSTheme' => 'smoothness', 
+					//'dateDirection' => 'gtToday')
 			);
 
 		$fields['endDate'] = array(
@@ -648,6 +663,11 @@ class ModuleEventEditor extends \Events {
 			'value' => $NewEventData['endDate'],
 			'eval' => array('rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true)
 			);
+			
+		if ($this->caledit_useDatePicker) {
+			$this->addDatePicker($fields['startDate']);
+			$this->addDatePicker($fields['endDate']);
+		}
 
 		$fields['startTime'] = array(
 			'name' => 'startTime',
@@ -831,6 +851,7 @@ class ModuleEventEditor extends \Events {
 			}
 			
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
+			$objWidget->parse();
 			// Validate widget
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$objWidget->validate();
@@ -1082,6 +1103,12 @@ class ModuleEventEditor extends \Events {
 				'value' => $newDates['end'.$i],
 				'eval' => array('rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true)
 			);
+			
+			if ($this->caledit_useDatePicker) {
+				$this->addDatePicker($fields['start'.$i]);
+				$this->addDatePicker($fields['end'.$i]);
+			}
+		
 		}
 		
 		if (!FE_USER_LOGGED_IN) {
@@ -1131,6 +1158,7 @@ class ModuleEventEditor extends \Events {
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];			
 			
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
+			$objWidget->parse();
 			// Validate widget
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$objWidget->validate();

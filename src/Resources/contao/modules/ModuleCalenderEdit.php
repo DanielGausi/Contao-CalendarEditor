@@ -1,31 +1,19 @@
 <?php 
 
 /**
+ * This file is part of 
+ * 
+ * CalendarEditorBundle
+ * @copyright  Daniel Gaußmann 2018
+ * @author     Daniel Gaußmann (Gausi) 
+ * @package    Calendar_Editor
+ * @license    LGPL-3.0-or-later
+ * @see        https://github.com/DanielGausi/Contao-CalendarEditor
+ *
+ * an extension for
  * Contao Open Source CMS
- * Copyright (C) 2005-2010 Leo Feyer
+ * (c) Leo Feyer, LGPL-3.0-or-later
  *
- * Formerly known as TYPOlight Open Source CMS.
- *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program. If not, please visit the Free
- * Software Foundation website at <http://www.gnu.org/licenses/>.
- *
- * PHP version 5
- *
- * @copyright  Daniel Gaussmann 2011-2018
- * @author     Daniel Gaussmann <mail@gausi.de>
- * @package    CalendarEditor
- * @license    GNU/LGPL
  */
  
 namespace DanielGausi\CalendarEditorBundle;
