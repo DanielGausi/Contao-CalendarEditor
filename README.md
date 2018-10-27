@@ -60,9 +60,9 @@ Preliminaries:
 ### The Event Editor module
 Now we can create a new Module of type "Event Editor". 
 
-The redirect page defines the page, where the user is redirected to after the formular is submitted succesfully. The FE user may overwrite this by a selection of some other pages (show the new event in Eventreader, show it in Eventeditor again, create a new Event or duplicate the event the user just created).
+The redirect page defines the page, where the user is redirected to after the formular is submitted succesfully. The FE user may overwrite this by a selection of some other pages (show the new event in event reader, show it in event editor again, create a new event or duplicate the just created event).
 
-The Backend user can specify some more settings here, which should be self-explaining. Just as in the Eventreader module a list of Calendars must be set where this module has access to.
+The Backend user can specify some more settings here, which should be self-explaining. Just as in the event reader module a list of calendars must be set where this modile has access to.
 
 There can als be set some more mandatory fields, which the FE user must fill in in the form.
 
@@ -70,15 +70,15 @@ To keep it simple, the field "CSS value" can be renamed into something the FE us
 
 For entering dates more comfortable, a jQuery Datepicker can be added to the form.
 
-This module should then be included in the Article on the Editor page you selected in the Calendar(s) before.
+This module should then be included in the article on the editor page you selected in the calendar(s) before.
 
 ### Provide "edit links" to the Frontend user
 
 If a user is authorized to edit events, he or she should be provided with some links to click on to edit these events. To update an existing website you should
 
-* Change the templates of Calendar modules to "cal_default_edit" templates (edit this templates to see how it works). 
-* Change the templates of Eventlist modules to one of the "\_edit" templates 
+* Change the templates of Calendar modules to "cal_default_edit" (edit this templates to see how it works). 
 * If you want to use the "add event" links, you have to replace the Calendar module with the Calendar FE module. This module adds also "add event" links for every day, which are used in the cal_default_edit template.
-* On the page with an Eventreader, you may also add a module of type "Event reader: Edit link"
+* Change the templates of Eventlist modules to one of the "\_edit" templates (edit these templates to see how it works). 
+* On the page with an event reader, you may also add a module of type "Event reader: Edit link"
 
-Note that an "edit link" is only added to the template, if the user is actually authorized to edit this event. If the current FE user is not authorized to edit an event, he or she should not see the link. If the user enters such an unauthorized edit-link, the editing form should show an error message.
+Note that an "edit link" is only added to the template, if the user is actually authorized to edit this event. If the current FE user is not authorized to edit an event, he or she should not see the link. If the user enters such an unauthorized edit-link in the address bar of the browser, the editing form should show an error message.
