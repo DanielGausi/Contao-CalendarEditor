@@ -76,7 +76,9 @@ This module should then be included in the Article on the Editor page you select
 
 If a user is authorized to edit events, he or she should be provided with some links to click on to edit these events. To update an existing website you should
 
-* replace a Calendar module with the Calendar FE module. This adds also "add links" for every day. If you don't need "add event links", you may also edit the existing calendar template
-* Change the templates of Eventlist modules to one of the "\_edit" templates (edit these templates to see how it works). 
+* Change the templates of Calendar modules to "cal_default_edit" templates (edit this templates to see how it works). 
+* Change the templates of Eventlist modules to one of the "\_edit" templates 
+* If you want to use the "add event" links, you have to replace the Calendar module with the Calendar FE module. This module adds also "add event" links for every day, which are used in the cal_default_edit template.
+* On the page with an Eventreader, you may also add a module of type "Event reader: Edit link"
 
-Note that an "edit link" is only added to the template, if the user is actually authorized to edit this event. 
+Note that an "edit link" is only added to the template, if the user is actually authorized to edit this event. If the current FE user is not authorized to edit an event, he or she should not see the link. If the user enters such an unauthorized edit-link, the editing form should show an error message.
