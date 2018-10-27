@@ -82,3 +82,11 @@ If a user is authorized to edit events, he or she should be provided with some l
 * On the page with an event reader, you may also add a module of type "Event reader: Edit link"
 
 Note that an "edit link" is only added to the template, if the user is actually authorized to edit this event. If the current FE user is not authorized to edit an event, he or she should not see the link. If the user enters such an unauthorized edit-link in the address bar of the browser, the editing form should show an error message.
+
+## Donation
+
+If you like this extension and think it's worth a little donation: You can support me via Paypal.Me:
+
+[Donation for CalendarEditor](https://paypal.me/CalendarEditor)
+
+Thank You!
