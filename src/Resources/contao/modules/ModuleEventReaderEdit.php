@@ -113,7 +113,7 @@ class ModuleEventReaderEdit extends Events
 			$UserIsAdmin = UserIsAdmin($objCalendar, $this->User);
 			
 			$AuthorizedUserElapsedEvents = UserIsAuthorizedElapsedEvents($objCalendar, $this->User);	
-			$AddEditLinks = EditLinksAreAllowed2 ($objCalendar, $objEvent, $this->User, $UserIsAdmin);
+			$AddEditLinks = EditLinksAreAllowed2 ($objCalendar, $objEvent, $this->User, $UserIsAdmin, $AuthorizedUser);
 			
 			if ($AddEditLinks) {				
 				// get the JumpToEdit-Page for this calendar

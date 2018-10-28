@@ -35,7 +35,7 @@ class CalendarModelEdit extends \CalendarModel
 		$t = static::$strTable;		
 		$arrColumns[] = "$t.id IN(" . implode(',', array_map('\intval', $arrIds)) . ")";
 
-		return static::findBy($arrColumns, $varId, $arrOptions);
+		return static::findBy($arrColumns, $arrOptions);
 	}
 
 }

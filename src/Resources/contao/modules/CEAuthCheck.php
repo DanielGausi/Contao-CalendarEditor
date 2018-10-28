@@ -65,40 +65,45 @@
 		return (UserIsAdmin($objCalendar, $User)) || ( UserIsAuthorizedUser($objCalendar, $User) && (! $objCalendar->caledit_onlyFuture));
 	}
 	
-	function EditLinksAreAllowed ($objCalendar, $aEvent, $userID, $UserIsAdmin, $currentTime){		
+	// used in GetAllEvents Hook
+	function EditLinksAreAllowed ($objCalendar, $aEvent, $userID, $UserIsAdmin, $UserIsMember, $currentTime){		
 		if ($UserIsAdmin && (!$aEvent['disable_editing'])) {
 			return TRUE;
-		} else
-		{			
+		} else {						
 			return 				
 				(
-				// Allow only if if the editing is NOT disabled in the backend for this event
-				(!$aEvent['disable_editing'])   				
+				// Allow only if the editing is NOT disabled in the backend for this event
+				(!$aEvent['disable_editing'])  
+				// Allow only if the User belongs to an authorized Member group
+				&& ($UserIsMember)				
+				// Allow only if FE User is logged in or the calendar does not requie login
+				&& ( FE_USER_LOGGED_IN || !$objCalendar->caledit_loginRequired)
 				// Allow only if CalendarEditing is not restricted to future events -OR- EventTime is later then CurrentTime, 
 				&& ((!$objCalendar->caledit_onlyFuture) ||  ($currentTime <= $aEvent['startTime']) )
 				// Allow only if CalendarEditing is not restricted to the Owner -OR- The Owner is currently logged in
 				&& ((!$objCalendar->caledit_onlyUser) || ($aEvent['fe_user'] == $userID))
 				);
-
 		}
 	}
 	
 	// used in Module ModuleEventReaderEdit
-	function EditLinksAreAllowed2 ($objCalendar, $objEvent, $User, $UserIsAdmin){
+	function EditLinksAreAllowed2 ($objCalendar, $objEvent, $User, $UserIsAdmin, $UserIsMember){
 		if ($UserIsAdmin && (!$objEvent->disable_editing)) {
 			return TRUE;
-		} else
-		{			
-			return 				
+		} else {
+			return 
 				(
 				// Allow only if if the editing is NOT disabled in the backend for this event
-				(!$objEvent->disable_editing)   				
+				(!$objEvent->disable_editing) 
+				// Allow only if the User belongs to an authorized Member group
+				&& ($UserIsMember)				
+				// Allow only if FE User is logged in or the calendar does not requie login
+				&& ( FE_USER_LOGGED_IN || !$objCalendar->caledit_loginRequired)				
 				// Allow only if CalendarEditing is not restricted to future events -OR- EventTime is later then CurrentTime, 
 				&& ((!$objCalendar->caledit_onlyFuture) ||  (time() <= $objEvent->startTime) )
 				// Allow only if CalendarEditing is not restricted to the Owner -OR- The Owner is currently logged in
 				&& ((!$objCalendar->caledit_onlyUser) || ($objEvent->fe_user == $User->id))
 				);
-
 		}
 	}
 	

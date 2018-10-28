@@ -851,7 +851,6 @@ class ModuleEventEditor extends \Events {
 			}
 			
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
-			$objWidget->parse();
 			// Validate widget
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$objWidget->validate();
@@ -861,6 +860,10 @@ class ModuleEventEditor extends \Events {
 			}			
 			$arrWidgets[$arrField['name']] = $objWidget;
 		}
+		// parse the Date fields, to show the Datepicker
+		$arrWidgets['startDate']->parse();
+		$arrWidgets['endDate']->parse();
+		
 		
 		// Check, whether the user is allowed to edit past events
 		// or the date is in the future
@@ -912,7 +915,7 @@ class ModuleEventEditor extends \Events {
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$this->Template->InfoClass = 'tl_error';
 				if ($this->Template->InfoMessage == '') {
-					$this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'];
+					$this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'].'wuppdi';
 				} // else: keep the InfoMesage as set before
 			} 
 			$this->Template->fields = $arrWidgets;
@@ -1157,8 +1160,7 @@ class ModuleEventEditor extends \Events {
 			$strClass = $GLOBALS['TL_FFL'][$arrField['inputType']];
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];			
 			
-			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
-			$objWidget->parse();
+			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));			
 			// Validate widget
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$objWidget->validate();
@@ -1167,6 +1169,11 @@ class ModuleEventEditor extends \Events {
 				}
 			}			
 			$arrWidgets[$arrField['name']] = $objWidget;
+		}
+		
+		for ($i = 1; $i <= 10; $i++) {			
+			$arrWidgets['start'.$i]->parse();
+			$arrWidgets['end'.$i]->parse();
 		}
 		
 		$allDatesAllowed = $this->allDatesAllowed($currentEventData['pid']);
