@@ -62,15 +62,15 @@ Now we can create a new Module of type "Event Editor".
 
 The redirect page defines the page, where the user is redirected to after the formular is submitted succesfully. The FE user may overwrite this by a selection of some other pages (show the new event in event reader, show it in event editor again, create a new event or duplicate the just created event).
 
-The Backend user can specify some more settings here, which should be self-explaining. Just as in the event reader module a list of calendars must be set where this modile has access to.
+The Backend user can specify some more settings here, which should be self-explaining. For example, a list of calendars must be set where this module has access to, just as in the event reader module as well.
 
-There can als be set some more mandatory fields, which the FE user must fill in in the form.
+There you can also set some more mandatory fields, which the FE user must fill in the form.
 
-To keep it simple, the field "CSS value" can be renamed into something the FE user may understand more easily. This depends on how CSS values are used in the calendar on your website. You can also add a list of predefined CSS values/labels.
+To keep it simple for the FE user, the field "CSS value" can be renamed into something the FE user may understand more easily. This depends on how CSS values are used in the calendar on your website. You can also add a list of predefined CSS values/labels.
 
 For entering dates more comfortable, a jQuery Datepicker can be added to the form.
 
-This module should then be included in the article on the editor page you selected in the calendar(s) before.
+This module should then be added to the article on the editor page you selected in the calendar(s) before.
 
 ### Provide "edit links" to the Frontend user
 
