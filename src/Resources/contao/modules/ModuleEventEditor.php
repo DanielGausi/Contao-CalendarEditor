@@ -215,6 +215,11 @@ class ModuleEventEditor extends \Events {
 			return false; // Event not found or something else is wrong
         }
 		
+		if (!$objCalendar->allowEdit) {
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed']; 
+            return false; 
+		}
+		
         // check calendar settings 
 		if (UserIsAuthorizedUser($objCalendar, $user)) {            
             // if the editing is disabled in the BE: Deny editing in the FE

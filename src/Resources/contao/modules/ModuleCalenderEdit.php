@@ -22,10 +22,7 @@ use Contao\Calendar;
 use Contao\CalendarModel;
 use Contao\Events;
 
-//use Contao\Calendar;
-//use Contao\CalendarModel;
-
- include_once('CEAuthCheck.php');
+include_once('CEAuthCheck.php');
 
 /**
  * Class ModuleCalenderEdit
@@ -49,25 +46,18 @@ class ModuleCalenderEdit extends \ModuleCalendar
 		return $IDs;
 	}
 
-	// check weather the current FE User is allowed to edit any of the calendars
+	// check whether the current FE User is allowed to edit any of the calendars
 	public function CheckUserAuthorizations($arrCalendars) {
 		$this->import('FrontendUser', 'User');			
 		$this->AllowElapsedEvents = False;
 		$this->AllowEditEvents = False;
 				
-		foreach ($arrCalendars as $id)
-		{			
-			// get properties of this calendar
-			$objCalendar = $this->Database->prepare("SELECT * FROM tl_calendar WHERE id=?")
-										->limit(1)
-										->execute($id);
-
+		$objCalendars = CalendarModelEdit::findByIds($arrCalendars);
+		foreach($objCalendars as $objCalendar) {
 			$this->AllowElapsedEvents = ($this->AllowElapsedEvents || UserIsAuthorizedElapsedEvents($objCalendar, $this->User) );
 			$this->AllowEditEvents    = ($this->AllowEditEvents    || UserIsAuthorizedUser($objCalendar, $this->User) );
-		}		
+		}
 	}
-
-	
 
 	// overwrite the compileWeeks-Method from ModuleCalendar
 	protected function compileWeeks()
@@ -83,7 +73,6 @@ class ModuleCalenderEdit extends \ModuleCalendar
 		// this will set the variables  $this->AllowEditEvents and $this->AllowElapsedEvents
 		$this->CheckUserAuthorizations($this->cal_calendar);
 			 
-
 		if ($this->AllowEditEvents){
 			// get the JumpToAdd-Page for this calendar
 			$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=?")

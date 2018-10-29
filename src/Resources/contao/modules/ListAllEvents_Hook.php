@@ -51,7 +51,7 @@ class ListAllEvents_Hook extends Frontend
 				return $arrEvents;
 			}
 
-            if(version_compare(VERSION.'.'.BUILD, '3.5.1', '>=')) {
+			if(version_compare(VERSION.'.'.BUILD, '3.5.1', '>=')) {
 				$this->import('StringUtil');
 			} else {
 				$this->import('String');			
