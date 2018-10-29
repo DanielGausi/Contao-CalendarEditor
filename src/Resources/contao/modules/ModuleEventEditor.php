@@ -915,7 +915,7 @@ class ModuleEventEditor extends \Events {
 			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
 				$this->Template->InfoClass = 'tl_error';
 				if ($this->Template->InfoMessage == '') {
-					$this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'].'wuppdi';
+					$this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'];
 				} // else: keep the InfoMesage as set before
 			} 
 			$this->Template->fields = $arrWidgets;
