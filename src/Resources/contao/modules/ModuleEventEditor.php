@@ -96,14 +96,25 @@ class ModuleEventEditor extends \Events {
      */
     public function addTinyMCE($str) {
         if (!empty($str)) {
-			$strFile = sprintf('%s/vendor/danielgausi/contao-calendareditor-bundle/src/Resources/contao/tinyMCE/%s.php', TL_ROOT, $str);
-					
-            $this->rteFields = 'ctrl_details,ctrl_teaser,teaser';
-            $this->language = 'en';
-            // Fallback to English if the user language is not supported
-            if (file_exists(TL_ROOT . '/assets/tinymce4/js/langs/' . $GLOBALS['TL_LANGUAGE'] . '.js')) {
-                $this->language = $GLOBALS['TL_LANGUAGE'];
-            }
+            $this->rteFields = 'ctrl_details,ctrl_teaser,teaser';            
+			// Fallback to English if the user language is not supported
+			$this->language = 'en';
+			
+			if(version_compare(VERSION.'.'.BUILD, '4.4.0', '>=')) {	
+				// Contao 4.4+
+				$strFile = sprintf('%s/vendor/danielgausi/contao-calendareditor-bundle/src/Resources/contao/tinyMCE/%s.php', TL_ROOT, $str);
+				if (file_exists(TL_ROOT . '/assets/tinymce4/js/langs/' . $GLOBALS['TL_LANGUAGE'] . '.js')) {
+					$this->language = $GLOBALS['TL_LANGUAGE'];
+				}
+			} else {
+				// Contao 3.x 
+				// or below 4.4 (not supported)
+				$strFile = sprintf('%s/system/config/%s.php', TL_ROOT, $str);
+				if (file_exists(TL_ROOT . '/assets/tinymce4/langs/' . $GLOBALS['TL_LANGUAGE'] . '.js')) {
+					$this->language = $GLOBALS['TL_LANGUAGE'];
+				}
+			}
+			
             if (!file_exists($strFile)) {
                 echo (sprintf('Cannot find rich text editor configuration file "%s"', $strFile));
             }else {			
@@ -215,8 +226,8 @@ class ModuleEventEditor extends \Events {
 			return false; // Event not found or something else is wrong
         }
 		
-		if (!$objCalendar->allowEdit) {
-			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed']; 
+		if (!$objCalendar->AllowEdit) {
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'].'wuppdi'; 
             return false; 
 		}
 		
@@ -633,11 +644,7 @@ class ModuleEventEditor extends \Events {
 				$this->Template->FatalError = $fatalError;
 				return ;
 			}
-		}
-		
-		//$GLOBALS['TL_JAVASCRIPT'][] = 'assets/jquery-ui/js/jquery-ui.min.js';
-		//$GLOBALS['TL_JAVASCRIPT'][] = 'assets/hofff/calendarfield/jquery-ui.datepicker/js/widgets/datepicker.min.js';
-		//$GLOBALS['TL_JAVASCRIPT'][] = 'assets/hofff/calendarfield/jquery-ui.datepicker/js/i18n/datepicker-de.js';
+		}		
 				
 		$mandfields = deserialize($this->caledit_mandatoryfields);
 		$mandTeaser = (is_array($mandfields) && array_intersect(array('teaser') , $mandfields));
@@ -650,15 +657,11 @@ class ModuleEventEditor extends \Events {
 		$fields['startDate'] = array(
 			'name' => 'startDate',
 			'label' => $GLOBALS['TL_LANG']['MSC']['caledit_startdate'],
-			'inputType' => 'text', // or: 'calendarfield', 
+			'inputType' => 'text', // or: 'calendarfield' (see below), 
 			'value' => $NewEventData['startDate'],
 			'eval' => array('rgxp' => 'date', 
 					'mandatory' => true, 
-					'decodeEntities' => true)
-					//'dateImage' => '1', 
-					//'dateIncludeCSS' => '1',
-					//'dateIncludeCSSTheme' => 'smoothness', 
-					//'dateDirection' => 'gtToday')
+					'decodeEntities' => true)					
 			);
 
 		$fields['endDate'] = array(
@@ -669,9 +672,13 @@ class ModuleEventEditor extends \Events {
 			'eval' => array('rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true)
 			);
 			
-		if ($this->caledit_useDatePicker) {
-			$this->addDatePicker($fields['startDate']);
-			$this->addDatePicker($fields['endDate']);
+		if(version_compare(VERSION.'.'.BUILD, '4.4.0', '>=')) {	
+			// Contao 4.4+ is using "calenderfield" by default
+			// Contao 3.5 will have to install it manually and install a proper Hook to achieve this
+			if ($this->caledit_useDatePicker) {
+				$this->addDatePicker($fields['startDate']);
+				$this->addDatePicker($fields['endDate']);
+			}
 		}
 
 		$fields['startTime'] = array(
@@ -750,11 +757,20 @@ class ModuleEventEditor extends \Events {
 			$ref = array();
 			$opt = array();
 
-			foreach ($cssValues as $cssv) {
-				$opt[] = $cssv['value'];
-				$ref[$cssv['value']] = $cssv['label'];
+			if(version_compare(VERSION.'.'.BUILD, '4.4.0', '>=')) {	
+			// Contao 4.4+ uses a different module for this multi-text-stuff
+			// and a slightly different DCA
+				foreach ($cssValues as $cssv) {
+					$opt[] = $cssv['value'];
+					$ref[$cssv['value']] = $cssv['label'];
+				}
+			} else {
+				foreach ($cssValues as $cssv) {
+					$opt[] = $cssv['1'];
+					$ref[$cssv['1']] = $cssv['0'];
+				}
 			}
-
+				
 			$fields['cssClass'] = array(
 				'name' => 'cssClass',
 				'label' => $cssLabel,
@@ -864,10 +880,12 @@ class ModuleEventEditor extends \Events {
 				}
 			}			
 			$arrWidgets[$arrField['name']] = $objWidget;
+		}		
+		if(version_compare(VERSION.'.'.BUILD, '4.4.0', '>=')) {	
+			// Contao 4.4+: The CalendarFields need to be parsed to activate JS
+			$arrWidgets['startDate']->parse();
+			$arrWidgets['endDate']->parse();
 		}
-		// parse the Date fields, to show the Datepicker
-		$arrWidgets['startDate']->parse();
-		$arrWidgets['endDate']->parse();
 		
 		
 		// Check, whether the user is allowed to edit past events
@@ -957,8 +975,7 @@ class ModuleEventEditor extends \Events {
 		$published = $currentEventObject->published;			
 						
 		$this->Template->CurrentEventLink = $this->GetEditorFrontendURLForEvent($currentEventObject);
-		
-		
+
 		$this->Template->CurrentTitle = $currentEventObject->title;
 		$this->Template->CurrentDate = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $currentEventObject->startDate);
 		
@@ -1042,14 +1059,13 @@ class ModuleEventEditor extends \Events {
 		$currentEventData = array();
 		$currentContentData = array();
 		$contentID = '';
-		
+
 		// add a "Edit this event"-Link
 		$del = str_replace('?clone=', '?edit=', $this->Environment->request);
 		$this->Template->editRef = $del;
 		$this->Template->editLabel = $GLOBALS['TL_LANG']['MSC']['caledit_editLabel'];
 		$this->Template->editTitle = $GLOBALS['TL_LANG']['MSC']['caledit_editTitle'];							
-		
-		
+
 		if ($this->caledit_allowDelete){
 			// add a "Delete this event"-Link
 			$del = str_replace('?clone=', '?delete=', $this->Environment->request);
@@ -1057,7 +1073,6 @@ class ModuleEventEditor extends \Events {
 			$this->Template->deleteLabel = $GLOBALS['TL_LANG']['MSC']['caledit_deleteLabel'];
 			$this->Template->deleteTitle = $GLOBALS['TL_LANG']['MSC']['caledit_deleteTitle'];							
 		}
-			
 		
 		// get a proper Content-Element
 		$this->getContentElements($currentID, $contentID, $currentContentData);	
@@ -1112,11 +1127,12 @@ class ModuleEventEditor extends \Events {
 				'eval' => array('rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true)
 			);
 			
-			if ($this->caledit_useDatePicker) {
-				$this->addDatePicker($fields['start'.$i]);
-				$this->addDatePicker($fields['end'.$i]);
+			if(version_compare(VERSION.'.'.BUILD, '4.4.0', '>=')) {
+				if ($this->caledit_useDatePicker) {
+					$this->addDatePicker($fields['start'.$i]);
+					$this->addDatePicker($fields['end'.$i]);
+				}
 			}
-		
 		}
 		
 		if (!FE_USER_LOGGED_IN) {
@@ -1157,7 +1173,6 @@ class ModuleEventEditor extends \Events {
 			}
 		}
 		
-		
 		// Initialize widgets
 		$arrWidgets = array();		
 		$doNotSubmit = false;
@@ -1176,9 +1191,12 @@ class ModuleEventEditor extends \Events {
 			$arrWidgets[$arrField['name']] = $objWidget;
 		}
 		
-		for ($i = 1; $i <= 10; $i++) {			
-			$arrWidgets['start'.$i]->parse();
-			$arrWidgets['end'.$i]->parse();
+		if(version_compare(VERSION.'.'.BUILD, '4.4.0', '>=')) {	
+			// Contao 4.4+: The CalendarFields need to be parsed to activate JS
+			for ($i = 1; $i <= 10; $i++) {			
+				$arrWidgets['start'.$i]->parse();
+				$arrWidgets['end'.$i]->parse();
+			}
 		}
 		
 		$allDatesAllowed = $this->allDatesAllowed($currentEventData['pid']);

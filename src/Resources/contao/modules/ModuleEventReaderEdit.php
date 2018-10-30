@@ -105,7 +105,7 @@ class ModuleEventReaderEdit extends Events
 			return; // No calendar found
 		}
 		
-		if ($objCalendar->allowEdit) {
+		if ($objCalendar->AllowEdit) {
 			// Calendar allows editing
 			// check user rights			
 			

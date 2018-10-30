@@ -21,16 +21,16 @@
  * Add palettes to tl_calendar
  */
 
-$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},allowEdit';
+$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{edit_legend},AllowEdit';
 
-$GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'allowEdit';
-$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['allowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser, caledit_groups, caledit_adminGroup';
+$GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'AllowEdit';
+$GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['AllowEdit']='caledit_onlyFuture, caledit_jumpTo, caledit_loginRequired, caledit_onlyUser, caledit_groups, caledit_adminGroup';
 
 
 
-$GLOBALS['TL_DCA']['tl_calendar']['fields']['allowEdit'] = array
+$GLOBALS['TL_DCA']['tl_calendar']['fields']['AllowEdit'] = array
 (
-	'label'                   => &$GLOBALS['TL_LANG']['tl_calendar']['allowEdit'],
+	'label'                   => &$GLOBALS['TL_LANG']['tl_calendar']['AllowEdit'],
 	'exclude'                 => true,
 	'filter'                  => true,
 	'inputType'               => 'checkbox',

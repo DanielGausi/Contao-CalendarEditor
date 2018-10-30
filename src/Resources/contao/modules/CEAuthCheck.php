@@ -18,7 +18,7 @@
 	
 	// Check, whether the User is an Admin to add/edit Events in this objCalendar
 	function UserIsAdmin($objCalendar, $User){
-		if (!$objCalendar->allowEdit) {
+		if (!$objCalendar->AllowEdit) {
 			return false;
 		} else {
 			if (FE_USER_LOGGED_IN) {
@@ -38,7 +38,7 @@
 	
 	// Check, whether the User is authorized to add/edit Events in this objCalendar
 	function UserIsAuthorizedUser($objCalendar, $User){
-		if (!$objCalendar->allowEdit) {
+		if (!$objCalendar->AllowEdit) {
 			return false;
 		} else {
 			if (!$objCalendar->caledit_loginRequired) {	
@@ -67,7 +67,7 @@
 	}
 	
 	function UserIsAuthorizedElapsedEvents($objCalendar, $User){
-		if (!$objCalendar->allowEdit) {
+		if (!$objCalendar->AllowEdit) {
 			return false;
 		} else {
 			// User is authorized to edit/add elapsed Events if
@@ -79,7 +79,7 @@
 	
 	// used in GetAllEvents Hook
 	function EditLinksAreAllowed ($objCalendar, $aEvent, $userID, $UserIsAdmin, $UserIsMember, $currentTime){		
-		if (!$objCalendar->allowEdit) {
+		if (!$objCalendar->AllowEdit) {
 			return false;
 		} else {
 			if ($UserIsAdmin && (!$aEvent['disable_editing'])) {
@@ -104,7 +104,7 @@
 	
 	// used in Module ModuleEventReaderEdit
 	function EditLinksAreAllowed2 ($objCalendar, $objEvent, $User, $UserIsAdmin, $UserIsMember){
-		if (!$objCalendar->allowEdit) {
+		if (!$objCalendar->AllowEdit) {
 			return false;
 		} else {
 			if ($UserIsAdmin && (!$objEvent->disable_editing)) {

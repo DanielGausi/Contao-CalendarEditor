@@ -4,7 +4,7 @@
  * Miscellaneous
  */
 
-$GLOBALS['TL_LANG']['tl_calendar']['allowEdit'] = array('Enable Frontend editing','Allow Frontend-Users to add and edit events in this calendar.');
+$GLOBALS['TL_LANG']['tl_calendar']['AllowEdit'] = array('Enable Frontend editing','Allow Frontend-Users to add and edit events in this calendar.');
 $GLOBALS['TL_LANG']['tl_calendar']['caledit_onlyFuture'] = array('Only future events','Allow editing only for future events.');
 $GLOBALS['TL_LANG']['tl_calendar']['caledit_jumpTo'] = array('Redirect page for editing','Please choose the event editor page to which the user will be redirected when clicking an edit link.');
 $GLOBALS['TL_LANG']['tl_calendar']['caledit_loginRequired'] = array('Login required for Frontend editing (strongly recommended)', 'If this is checked, only registered user (from the groups below) are allowed to add/edit events. WARNING: Otherwise EVERYBODY can add/edit events.');

@@ -72,7 +72,7 @@ class ListAllEvents_Hook extends Frontend
 				
 				$CalendarObjects[$currentPID] = $objCalendar;				
 				
-				if ($objCalendar->allowEdit) {
+				if ($objCalendar->AllowEdit) {
 					// is user admin for this calendar?
 					$UserIsAdminForCalendar[$currentPID]  = UserIsAdmin          ($objCalendar, $this->User);
 					$UserIsMemberForCalendar[$currentPID] = UserIsAuthorizedUser ($objCalendar, $this->User);
@@ -101,7 +101,7 @@ class ListAllEvents_Hook extends Frontend
 				foreach ($intnext as &$intdate) {
 					foreach ($intdate as &$aEvent){
 						$cPID = $aEvent['pid'];
-						if ( ($CalendarObjects[$cPID]->allowEdit) && EditLinksAreAllowed($CalendarObjects[$cPID], $aEvent, $this->User->id, $UserIsAdminForCalendar[$cPID], $UserIsMemberForCalendar[$cPID], $currentTime)){
+						if ( ($CalendarObjects[$cPID]->AllowEdit) && EditLinksAreAllowed($CalendarObjects[$cPID], $aEvent, $this->User->id, $UserIsAdminForCalendar[$cPID], $UserIsMemberForCalendar[$cPID], $currentTime)){
 							$this->addEditLinks($aEvent, $JumpPages[$cPID]);
 						}	
 					}
