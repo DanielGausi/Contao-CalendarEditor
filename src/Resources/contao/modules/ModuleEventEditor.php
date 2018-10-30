@@ -227,7 +227,7 @@ class ModuleEventEditor extends \Events {
         }
 		
 		if (!$objCalendar->AllowEdit) {
-			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'].'wuppdi'; 
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed']; 
             return false; 
 		}
 		
@@ -1179,6 +1179,18 @@ class ModuleEventEditor extends \Events {
 		foreach ($fields as $arrField) {
 			$strClass = $GLOBALS['TL_FFL'][$arrField['inputType']];
 			$arrField['eval']['required'] = $arrField['eval']['mandatory'];			
+		
+			// from http://pastebin.com/HcjkHLQK
+			// via https://github.com/contao/core/issues/5086
+			// Convert date formats into timestamps (check the eval setting first -> #3063)
+			if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit'){
+				$rgxp = $arrField['eval']['rgxp'];			
+				if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $arrField['value'] != '')
+				{
+					$objDate  = new \Date($varValue, $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+					$arrField['value'] = $objDate->tstamp;
+				}
+			}		
 			
 			$objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));			
 			// Validate widget
