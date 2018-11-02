@@ -85,13 +85,13 @@ class ListAllEvents_Hook extends Frontend
 						$JumpPages[$currentPID] = $this->generateFrontendUrl($objPage->row(), '');
 					}
 					else {
-						$JumpPages[$currentPID] = $this->Environment->request;
+						$JumpPages[$currentPID] = ''; //$this->Environment->request;
 					}
 				} else {
 					// no editing allowed in this calendar
 					$UserIsAdminForCalendar[$currentPID] = false;
 					$UserIsMemberForCalendar[$currentPID] = false;
-					$JumpPages[$currentPID] = $this->Environment->request;
+					$JumpPages[$currentPID] = ''; //$this->Environment->request;
 				}
 			}			
 			

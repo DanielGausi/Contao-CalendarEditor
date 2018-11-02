@@ -82,7 +82,7 @@ class ModuleCalenderEdit extends \ModuleCalendar
 				$addUrl = $this->generateFrontendUrl($objPage->row(), '');
 			}
 			else {
-				$addUrl = $this->Environment->request;
+				$addUrl = ''; //$this->Environment->request;
 			}
 		}
 		$intYear = date('Y', $this->Date->tstamp);

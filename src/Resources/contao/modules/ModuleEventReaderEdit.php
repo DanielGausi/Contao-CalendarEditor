@@ -124,7 +124,7 @@ class ModuleEventReaderEdit extends Events
 					$strUrl = $this->generateFrontendUrl($objPage->row(), '');
 				}
 				else {
-					$strUrl = $this->Environment->request;	
+					$strUrl = '';//$this->Environment->request;	
 				}
 					
 				$this->Template->editRef = $strUrl.'?edit='.$objEvent->id;
