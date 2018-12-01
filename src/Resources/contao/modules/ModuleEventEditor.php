@@ -173,20 +173,29 @@ class ModuleEventEditor extends \Events {
 		}
 	}
 	
-	public function checkValidDate($calendarID, $newDate, $objWidget) {		
+	public function checkValidDate($calendarID, $objStart, $objEnd) {		
 		$objCalendar = $this->getCalendarObjectFromPID($calendarID);
 		if (NULL === $objCalendar) {
 			return false;
-		}
+		}	
+		$tmpStartDate = strtotime($objStart->__get('value'));		
+		$tmpEndDate = strtotime($objEnd->__get('value'));
 		
 		if ((!$objCalendar->caledit_onlyFuture) || UserIsAdmin($objCalendar, $this->User)) {		
 			// elapsed events can be edited, or user is an admin
 			return true;
 		} else {
 			// editing elapsed events is denied and user is not an admin			
-			$isValid = ($newDate >= time());
+			//$isValid = ($newDate >= time());
+			$isValid = DateIsNotElapsed($tmpStartDate, $tmpEndDate);
 			if (!$isValid) {
-				$objWidget->addError($GLOBALS['TL_LANG']['MSC']['caledit_formErrorElapsedDate']);
+				if (!$tmpEndDate && (MidnightTime() > $tmpStartDate)) {
+					$objStart->addError($GLOBALS['TL_LANG']['MSC']['caledit_formErrorElapsedDate']);					
+				}
+				if ($tmpEndDate && (MidnightTime() > $tmpEndDate)) {
+					$objEnd->addError($GLOBALS['TL_LANG']['MSC']['caledit_formErrorElapsedDate']);					
+				}
+				//$objWidget->addError($GLOBALS['TL_LANG']['MSC']['caledit_formErrorElapsedDate']);
 			}
 			return $isValid;
 		}		
@@ -240,7 +249,11 @@ class ModuleEventEditor extends \Events {
             }
 						
 			$userIsAdmin = UserIsAdmin($objCalendar, $user);
-			if (!$userIsAdmin && ($CurrentObjectData->startTime <= time()) && ($objCalendar->caledit_onlyFuture)){
+			//if (!$userIsAdmin && ($CurrentObjectData->startTime <= time()) && ($objCalendar->caledit_onlyFuture)){
+			if (!$userIsAdmin
+			    && (!DateIsNotElapsed($CurrentObjectData->startTime, $CurrentObjectData->endTime ))
+					//($CurrentObjectData->startTime <= time()) 
+				&& ($objCalendar->caledit_onlyFuture)){
 				$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoPast'];				
 				return false;
 			  }
@@ -886,12 +899,13 @@ class ModuleEventEditor extends \Events {
 			$arrWidgets['startDate']->parse();
 			$arrWidgets['endDate']->parse();
 		}
-		
-		
+				
 		// Check, whether the user is allowed to edit past events
 		// or the date is in the future
-		$newDate = strtotime($arrWidgets['startDate']->__get('value'));		
-		$validDate = $this->checkValidDate($NewEventData['pid'], $newDate, $arrWidgets['startDate']);		
+		//$tmpStartDate = strtotime($arrWidgets['startDate']->__get('value'));		
+		//$tmpEndDate = strtotime($arrWidgets['endDate']->__get('value'));		
+		
+		$validDate = $this->checkValidDate($NewEventData['pid'], $arrWidgets['startDate'], $arrWidgets['endDate']);	
 		if (!$validDate) {
 			// modification of the widget is done in checkValidDate
 			$doNotSubmit = true;

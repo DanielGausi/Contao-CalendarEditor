@@ -96,7 +96,7 @@ class ListAllEvents_Hook extends Frontend
 			}			
 			
 			// now: scan the events-array and add edit links where appropriate
-			$currentTime = time();
+			$currentTime = MidnightTime();
 			foreach ($arrEvents as &$intnext) {
 				foreach ($intnext as &$intdate) {
 					foreach ($intdate as &$aEvent){

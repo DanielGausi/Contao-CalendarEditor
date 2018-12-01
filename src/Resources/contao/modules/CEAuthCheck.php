@@ -15,6 +15,48 @@
  * (c) Leo Feyer, LGPL-3.0-or-later
  *
  */
+ 
+	// Get a timestamp for midnight, today
+	function MidnightTime() {
+		return mktime(0,0,0,date("m"),date("d"),date("Y"));		
+	}
+	
+	// Check, whether the event time (defined by start/end date) is "in the past"
+	// this means here: It ends before the current day	
+	// Therefore, if an event ends at 1:00am, it can be edited up to 23 hours after it expires
+	// Dates are timestamps here, not Strings
+	// returns TRUE if the Dates are not elapsed (that long) and therfore can be edited by the user,
+	// even if "only future events" is enabled
+	//
+	// used in the editor to validate Userinput
+	function DateIsNotElapsed($StartDate, $EndDate) {
+		if (!$EndDate) {
+			$EndDate = $StartDate;
+		}
+		return MidnightTime() <= $EndDate;		
+	}
+	
+	// the same as above, but with events, not single dates
+	//
+	// used in GetAllEvents Hook, 
+	// "Midnight" is required often there, therefore an extra parameter for this
+	function EventIsNotElapsed($aEvent, $currentMidnight) {
+		if (!$aEvent['endTime']) {
+			return $currentMidnight <= $aEvent['startTime'];
+		} else {
+			return $currentMidnight <= $aEvent['endTime'];
+		}		
+	}
+	
+	// used in Module ModuleEventReaderEdit	
+	// midnight is used only once, therefore no extra parameter for this.
+	function EventIsNotElapsed2($objEvent) {
+		if (!$objEvent->endTime) {
+			return MidnightTime() <= $objEvent->startTime;
+		} else {
+			return MidnightTime() <= $objEvent->endTime;
+		}		
+	}
 	
 	// Check, whether the User is an Admin to add/edit Events in this objCalendar
 	function UserIsAdmin($objCalendar, $User){
@@ -94,7 +136,9 @@
 					// Allow only if FE User is logged in or the calendar does not requie login
 					&& ( FE_USER_LOGGED_IN || !$objCalendar->caledit_loginRequired)
 					// Allow only if CalendarEditing is not restricted to future events -OR- EventTime is later then CurrentTime, 
-					&& ((!$objCalendar->caledit_onlyFuture) ||  ($currentTime <= $aEvent['startTime']) )
+					// && ((!$objCalendar->caledit_onlyFuture) ||  ($currentTime <= $aEvent['startTime']) )
+					
+					&& ((!$objCalendar->caledit_onlyFuture) ||  (EventIsNotElapsed($aEvent, $currentTime)) )
 					// Allow only if CalendarEditing is not restricted to the Owner -OR- The Owner is currently logged in
 					&& ((!$objCalendar->caledit_onlyUser) || ($aEvent['fe_user'] == $userID))
 					);
@@ -119,7 +163,9 @@
 					// Allow only if FE User is logged in or the calendar does not requie login
 					&& ( FE_USER_LOGGED_IN || !$objCalendar->caledit_loginRequired)				
 					// Allow only if CalendarEditing is not restricted to future events -OR- EventTime is later then CurrentTime, 
-					&& ((!$objCalendar->caledit_onlyFuture) ||  (time() <= $objEvent->startTime) )
+					//&& ((!$objCalendar->caledit_onlyFuture) ||  (time() <= $objEvent->startTime) )
+					&& ((!$objCalendar->caledit_onlyFuture) ||  (EventIsNotElapsed2($objEvent)) )
+					
 					// Allow only if CalendarEditing is not restricted to the Owner -OR- The Owner is currently logged in
 					&& ((!$objCalendar->caledit_onlyUser) || ($objEvent->fe_user == $User->id))
 					);
