@@ -25,7 +25,7 @@
 
 if ($GLOBALS['TL_CONFIG']['useRTE']): ?>
 
-<script src="<?php echo TL_ASSETS_URL; ?>assets/tinymce4/js/tinymce.gzip.js"></script>
+<script src="<?php echo TL_ASSETS_URL; ?>assets/tinymce4/js/tinymce.min.js"></script>
 <script>tinymce.init({
 	selector:'textarea#ctrl_details, textarea#ctrl_teaser',
 	menubar : false,
