@@ -83,6 +83,17 @@ If a user is authorized to edit events, he or she should be provided with some l
 
 Note that an "edit link" is only added to the template, if the user is actually authorized to edit this event. If the current FE user is not authorized to edit an event, he or she should not see the link. If the user enters such an unauthorized edit-link in the address bar of the browser, the editing form should show an error message.
 
+### Captchas
+
+This module supports editing of events even for not registered users. In this case, a captcha is included to the formular. With the most recent changes to Contao 4.6, this does not work any more as it did in Contao 4.4. 
+
+Now it works like this:
+
+* By default the captcha is included (for non registered users), but extended with the built-in honeypot system from Contao. Therefore it is *not* shown to most users, but your calendar should still be protected against spam bots. If the user has disabled Javascript for your site, the captcha is shown.
+* If the honeypot does not work for you, and you get a lot of spam entries, you can try to use the new editor template `eventEdit_ForceCaptcha.html5`. That way the captcha is always shown, but it may lead to a duplicate captcha field on the form in case the user answers it wrong, or Javascript is disabled.
+* You can modify the captcha field by editing the template `form_captcha_calendar-editor.html5` so it matches your modified editor template.
+* The Delete-Event template always present a captcha, even to registered users to prevent unintended deleting of events. On this form, it may also happen that the captcha field is duplicated.
+
 ## Donation
 
 If you like this extension and think it's worth a little donation: You can support me via Paypal.Me:
