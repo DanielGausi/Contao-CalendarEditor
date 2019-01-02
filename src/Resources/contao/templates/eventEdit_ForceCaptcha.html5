@@ -156,6 +156,12 @@
 			<?php if ($this->fields['captcha']): ?>
 				<?php $objWidget = $this->fields['captcha']; ?>	
 				<?= $objWidget->parse() ?>
+				<tr class="<?php echo $class; ?>">
+					<td class="label">
+						<?php echo $objWidget->generateQuestion(); 
+							echo '<span class="mandatory">*</span>';?></td>
+					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
+				</tr>			
 			<?php endif; ?>
 					
 			<tr class="<?php echo $class; ?>">

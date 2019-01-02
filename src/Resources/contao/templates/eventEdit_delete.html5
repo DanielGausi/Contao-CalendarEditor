@@ -53,6 +53,7 @@
 			<tbody>
 			<?php if ($this->fields['captcha']): ?>
 				<?php $objWidget = $this->fields['captcha']; ?>		
+				<?= $objWidget->parse() ?>
 				<tr class="<?php echo $class; ?>">
 					<td class="label">
 						<?php echo $objWidget->generateQuestion(); 

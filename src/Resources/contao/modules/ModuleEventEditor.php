@@ -827,8 +827,8 @@ class ModuleEventEditor extends \Events {
 		if (!FE_USER_LOGGED_IN) {
 			$fields['captcha'] = array(
 				'name' => 'captcha',	
-				'inputType' => 'captcha',
-				'eval' => array('mandatory'=>true)
+				'inputType' => 'captcha',				
+				'eval' => array('mandatory'=>true, 'customTpl' => 'form_captcha_calendar-editor')
 				);
 		}		
 		
@@ -1004,8 +1004,8 @@ class ModuleEventEditor extends \Events {
 		// create captcha field		
 		$captchaField = array(
 				'name' => 'captcha',				
-				'inputType' => 'captcha',
-				'eval' => array('mandatory' => TRUE)
+				'inputType' => 'captcha',				
+				'eval' => array('mandatory'=>true, 'customTpl' => 'form_captcha_calendar-editor')
 				);		
 		
 		$arrWidgets = array();
@@ -1152,8 +1152,8 @@ class ModuleEventEditor extends \Events {
 		if (!FE_USER_LOGGED_IN) {
 			$fields['captcha'] = array(
 				'name' => 'captcha',	
-				'inputType' => 'captcha',
-				'eval' => array('mandatory'=>true)
+				'inputType' => 'captcha',		
+				'eval' => array('mandatory'=>true, 'customTpl' => 'form_captcha_calendar-editor')
 				);
 		}
 		
