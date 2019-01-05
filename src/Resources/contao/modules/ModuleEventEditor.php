@@ -157,7 +157,7 @@ class ModuleEventEditor extends \Events {
 		current events Pid (= the ID of the calendar)
 	**/
 	public function  getCalendarObjectFromPID($pid) {
-		foreach($this->$AllowedCalendars as $objCalendar) {
+		foreach($this->AllowedCalendars as $objCalendar) {
 			if ($pid == $objCalendar->id) {
 				return $objCalendar;
 			}
@@ -194,8 +194,7 @@ class ModuleEventEditor extends \Events {
 				}
 				if ($tmpEndDate && (MidnightTime() > $tmpEndDate)) {
 					$objEnd->addError($GLOBALS['TL_LANG']['MSC']['caledit_formErrorElapsedDate']);					
-				}
-				//$objWidget->addError($GLOBALS['TL_LANG']['MSC']['caledit_formErrorElapsedDate']);
+				}				
 			}
 			return $isValid;
 		}		
@@ -236,7 +235,7 @@ class ModuleEventEditor extends \Events {
         }
 		
 		if (!$objCalendar->AllowEdit) {
-			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed']; 
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'].'(checkUserEditRights)'; 
             return false; 
 		}
 		
@@ -265,7 +264,7 @@ class ModuleEventEditor extends \Events {
 				
 			return $result;
         }else {
-			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed']; 
+			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_UnauthorizedUser']; 
             return false; // user is not allowed to edit events here
         }
     }    
@@ -640,20 +639,20 @@ class ModuleEventEditor extends \Events {
 			if ($published && !$this->caledit_allowPublish){
 				// this should never happen, except the FE user is manipulating
 				// the POST-Data with some evil HackerToolz ;-)
-				$fatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoPublishAllowed'];
+				$fatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoPublishAllowed'].' (POST data invalid)';
 				$this->Template->FatalError = $fatalError;
 				return ;
 			}
 						
 			if (empty($NewEventData['pid'])) {
 				// set default value 				
-				$NewEventData['pid'] = $this->$AllowedCalendars[0]->id; //['id'];				
+				$NewEventData['pid'] = $this->AllowedCalendars[0]->id; //['id'];				
 			};
 						
 			if (  !$this->UserIsToAddCalendar($this->User, $NewEventData['pid'])  ){
 				// this should never happen, except the FE user is manipulating
 				// the POST with some evil HackerToolz. ;-)
-				$fatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'];
+				$fatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'].' (POST data invalid)';
 				$this->Template->FatalError = $fatalError;
 				return ;
 			}
@@ -742,11 +741,11 @@ class ModuleEventEditor extends \Events {
 			'eval' => array('mandatory' => $mandDetails, 'rte' => 'tinyMCE', 'allowHtml' => true)
 			);
 						
-		if (count($this->$AllowedCalendars) > 1) {
+		if (count($this->AllowedCalendars) > 1) {
 			// Show allowed Calendars in a select-field
 			$pref = array();
 			$popt = array();
-			foreach ($this->$AllowedCalendars as $cal) {				
+			foreach ($this->AllowedCalendars as $cal) {				
 				$popt[] = $cal->id;
 				$pref[$cal->id] = $cal->title;				
 			}
@@ -912,7 +911,7 @@ class ModuleEventEditor extends \Events {
 		}	
 									
 		$this->Template->submit = $GLOBALS['TL_LANG']['MSC']['caledit_saveData'];
-		$this->Template->calendars = $this->$AllowedCalendars;
+		$this->Template->calendars = $this->AllowedCalendars;
 		
 		if ((!$doNotSubmit) && ($this->Input->post('FORM_SUBMIT') == 'caledit_submit')){
 			// everything seems to be ok, so we can add the POST Data
@@ -1031,7 +1030,7 @@ class ModuleEventEditor extends \Events {
 		
 		
 		if ((!$doNotSubmit) && ($this->Input->post('FORM_SUBMIT') == 'caledit_submit')){
-			// everything seems to be ok, so we can delete this event															
+			// everything seems to be ok, so we can delete this event
 						
 			// for notification e-mail
 			$oldEventData = array(
@@ -1391,8 +1390,8 @@ class ModuleEventEditor extends \Events {
 		$fatalError = False;
 				
         $this->import('FrontendUser', 'User');
-        $this->$AllowedCalendars = $this->getCalendars($this->User);			
-        if (count($this->$AllowedCalendars) == 0) {
+        $this->AllowedCalendars = $this->getCalendars($this->User);			
+        if (count($this->AllowedCalendars) == 0) {
 			$fatalError = True;				
 			$this->ErrorString = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'];
         } else {						
