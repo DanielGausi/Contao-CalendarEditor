@@ -22,7 +22,7 @@
  
 namespace DanielGausi\CalendarEditorBundle;	
 		  
-
+use Contao; 
 use Contao\Calendar;
 use Contao\CalendarModel;
 use Contao\Events;
@@ -1313,7 +1313,7 @@ class ModuleEventEditor extends \Events {
 	
 	
 	protected function SendNotificationMail($NewEventData, $editID, $User, $cloneDates)  {
-		$Notification = new Email();
+		$Notification = new \Contao\Email();
 		$Notification->from = $GLOBALS['TL_ADMIN_EMAIL'];
 		
 		$host = $this->Environment->host;
