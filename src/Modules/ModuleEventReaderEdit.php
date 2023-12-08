@@ -1,34 +1,14 @@
 <?php 
 
-/**
- * This file is part of 
- * 
- * CalendarEditorBundle
- * @copyright  Daniel Gaußmann 2018
- * @author     Daniel Gaußmann (Gausi) 
- * @package    Calendar_Editor
- * @license    LGPL-3.0-or-later
- * @see        https://github.com/DanielGausi/Contao-CalendarEditor
- *
- * an extension for
- * Contao Open Source CMS
- * (c) Leo Feyer, LGPL-3.0-or-later
- *
- */
+namespace DanielGausi\CalendarEditorBundle\Modules;
 
-
-/**
- * Class ModuleEventReaderEdit 
- */
- 
-namespace DanielGausi\CalendarEditorBundle; 
-
-use Contao\Calendar;
-use Contao\CalendarModel;
 use Contao\Events;
- 
-include_once('CEAuthCheck.php');
- 
+use Contao\Input;
+use Contao\StringUtil;
+use Contao\System;
+use DanielGausi\CalendarEditorBundle\Models\CalendarModelEdit;
+use DanielGausi\CalendarEditorBundle\Services\CheckAuthService;
+
 class ModuleEventReaderEdit extends Events
 {
 
@@ -57,11 +37,11 @@ class ModuleEventReaderEdit extends Events
 		}
 		
 		// Return if no event has been specified
-		if (!$this->Input->get('events')) {
+		if (!Input::get('events')) {
 			return '';
 		}
 		
-		$this->cal_calendar = $this->sortOutProtected(deserialize($this->cal_calendar));
+		$this->cal_calendar = $this->sortOutProtected(StringUtil::deserialize($this->cal_calendar));
 
 		// Return if there are no calendars
 		if (!is_array($this->cal_calendar) || count($this->cal_calendar) < 1)
@@ -71,22 +51,19 @@ class ModuleEventReaderEdit extends Events
 		return parent::generate();
 	}
 
-
-	/**
-	 * Generate module
-	 */
-	protected function compile()
-	{
+	protected function compile(): void
+    {
 		$this->Template = new \FrontendTemplate($this->strTemplate);
 		$this->Template->editRef = '';
 		
 		// FE user is logged in
 		$this->import('FrontendUser', 'User');
+        $time = time();
 		
 		// Get current event
 		$objEvent = $this->Database->prepare("SELECT *, author AS authorId, (SELECT title FROM tl_calendar WHERE tl_calendar.id=tl_calendar_events.pid) AS calendar, (SELECT name FROM tl_user WHERE id=author) author FROM tl_calendar_events WHERE pid IN(" . implode(',', array_map('intval', $this->cal_calendar)) . ") AND (id=? OR alias=?)" . (!BE_USER_LOGGED_IN ? " AND (start='' OR start<?) AND (stop='' OR stop>?) AND published=1" : ""))
 								   ->limit(1)
-								   ->execute((is_numeric($this->Input->get('events')) ? $this->Input->get('events') : 0), $this->Input->get('events'), $time, $time);
+								   ->execute((is_numeric(Input::get('events')) ? Input::get('events') : 0), Input::get('events'), $time, $time);
 
 		if ($objEvent->numRows < 1) {				
 			$this->Template->error = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'];
@@ -95,36 +72,33 @@ class ModuleEventReaderEdit extends Events
 		}
 		
 		// get Calender with PID
-		$pid = $objEvent->pid;
-		$objCalendar = $this->Database->prepare("SELECT * FROM tl_calendar WHERE id=?")
-                         			->limit(1)
-									->execute($pid);
+        $calendarModel = CalendarModelEdit::findByPk($objEvent->pid);
 
 									
-		if ($objCalendar->numRows < 1) {
-			return; // No calendar found
+		if ($calendarModel === null) {
+			return;
 		}
 		
-		if ($objCalendar->AllowEdit) {
+		if ($calendarModel->AllowEdit) {
 			// Calendar allows editing
-			// check user rights			
+			// check user rights
+            /** @var CheckAuthService $checkAuthService */
+            $checkAuthService = System::getContainer()->get('caledit.service.auth');
 			
-			$AuthorizedUser = UserIsAuthorizedUser($objCalendar, $this->User);
-			$UserIsAdmin = UserIsAdmin($objCalendar, $this->User);
+			$isUserAuthorized = $checkAuthService->isUserAuthorized($calendarModel, $this->User);
+			$isUserAdmin = $checkAuthService->isUserAdmin($calendarModel, $this->User);
 			
-			$AuthorizedUserElapsedEvents = UserIsAuthorizedElapsedEvents($objCalendar, $this->User);	
-			$AddEditLinks = EditLinksAreAllowed2 ($objCalendar, $objEvent, $this->User, $UserIsAdmin, $AuthorizedUser);
-			
-			if ($AddEditLinks) {				
+			$authorizedElapsedEvents = $checkAuthService->isUserAuthorizedElapsedEvents($calendarModel, $this->User);
+			$areEditLinksAllowed = $checkAuthService->areEditLinksAllowed($calendarModel, $objEvent->row(), $this->User->id, $isUserAdmin, $isUserAuthorized);
+
+            $strUrl = '';
+			if ($areEditLinksAllowed) {
 				// get the JumpToEdit-Page for this calendar
-				$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=(SELECT caledit_jumpTo FROM tl_calendar WHERE id=?)")
+				$objPage = $this->Database->prepare("SELECT * FROM tl_page WHERE id=(SELECT caledit_jumpTo FROM tl_calendar WHERE id=?)")
 								  ->limit(1)
-								  ->execute($objCalendar->id);
+								  ->execute($calendarModel->id);
 				if ($objPage->numRows) {
 					$strUrl = $this->generateFrontendUrl($objPage->row(), '');
-				}
-				else {
-					$strUrl = '';//$this->Environment->request;	
 				}
 					
 				$this->Template->editRef = $strUrl.'?edit='.$objEvent->id;
@@ -143,7 +117,7 @@ class ModuleEventReaderEdit extends Events
 				}
 
 			} else {
-				if (!$AuthorizedUser) {
+				if (!$isUserAuthorized) {
 					$this->Template->error_class = 'error';
 					$this->Template->error = $GLOBALS['TL_LANG']['MSC']['caledit_UnauthorizedUser'];
 					return;
@@ -154,7 +128,7 @@ class ModuleEventReaderEdit extends Events
 					$this->Template->error = $GLOBALS['TL_LANG']['MSC']['caledit_DisabledEvent'];
 					$this->Template->error_class = 'error';
 				} else {
-					if (!$AuthorizedUserElapsedEvents) {
+					if (!$authorizedElapsedEvents) {
 						// the user is authorized, but the event has elapsed
 						$this->Template->error = $GLOBALS['TL_LANG']['MSC']['caledit_NoPast'];
 						$this->Template->error_class = 'error';
@@ -168,7 +142,6 @@ class ModuleEventReaderEdit extends Events
 		} else {
 			$this->Template->error_class = 'error';
 			$this->Template->error = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'];
-			return ;
 		}		
 	}
 }

@@ -1,4 +1,6 @@
-<?php 
+<?php
+
+namespace DanielGausi\CalendarEditorBundle;
 
 /**
  * This file is part of 

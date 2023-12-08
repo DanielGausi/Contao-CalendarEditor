@@ -67,8 +67,12 @@ class ModuleHiddenEventlist extends \ModuleEventlist
 	
 	/**
 	 * GetAllEvents: Almost the same as in class Events, but with "published=0"
-	 */
-	protected function getAllEvents($arrCalendars, $intStart, $intEnd)
+     * @param array $arrCalendars
+     * @param int $intStart
+     * @param int $intEnd
+     * @param null $blnFeatured
+     */
+	protected function getAllEvents($arrCalendars, $intStart, $intEnd, $blnFeatured = null)
 	{
 		if (!is_array($arrCalendars))
 		{
