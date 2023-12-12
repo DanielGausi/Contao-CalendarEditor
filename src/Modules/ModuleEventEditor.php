@@ -952,11 +952,11 @@ class ModuleEventEditor extends \Events
         $this->Template->CurrentPublished = $published;
 
         // create captcha field
-        $captchaField = array(
+        $captchaField = [
             'name' => 'captcha',
             'inputType' => 'captcha',
-            'eval' => array('mandatory' => true, 'customTpl' => 'form_captcha_calendar-editor')
-        );
+            'eval' => ['mandatory' => true, 'customTpl' => 'form_captcha_calendar-editor']
+        ];
 
         $arrWidgets = array();
         // Initialize widgets
@@ -964,7 +964,7 @@ class ModuleEventEditor extends \Events
         $strClass = $GLOBALS['TL_FFL'][$captchaField['inputType']];
 
         $captchaField['eval']['required'] = $captchaField['eval']['mandatory'];
-        $objWidget = new $strClass($this->prepareForWidget($captchaField, $captchaField['name'], $captchaField['value']));
+        $objWidget = new $strClass($this->prepareForWidget($captchaField, $captchaField['name']));
         // Validate widget
         if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
             $objWidget->validate();

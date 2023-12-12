@@ -1,4 +1,4 @@
-<tr class="<?php echo $class; ?>">
+<tr>
 	<td class="label">
 		<?php echo $this->generateQuestion(); 
 			echo '<span class="mandatory">*</span>';?>		

@@ -75,12 +75,12 @@ class CheckAuthService
 
     public function areEditLinksAllowed($calendar, array $event, int $userID, bool $isUserAdmin, bool $isUserMember): bool
     {
-        if (!$calendar->AllowEdit) {
+        if ($calendar->AllowEdit !== '1') {
             return false;
         }
 
         if ($isUserAdmin && (!$event['disable_editing'])) {
-            return TRUE;
+            return true;
         }
 
         return

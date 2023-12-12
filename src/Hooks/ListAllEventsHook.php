@@ -10,9 +10,9 @@ class ListAllEventsHook extends \Frontend
 {
     protected string $strTemplate = '';
 
-    public function addEditLinks(array &$event, $strUrl): void
+    public function addEditLinks(array &$event, $url): void
     {
-        $event['editRef'] = $strUrl . '?edit=' . $event['id'];
+        $event['editRef'] = $url . '?edit=' . $event['id'];
         $event['editLabel'] = $GLOBALS['TL_LANG']['MSC']['caledit_editLabel'];
         $event['editTitle'] = $GLOBALS['TL_LANG']['MSC']['caledit_editTitle'];
     }
@@ -64,18 +64,17 @@ class ListAllEventsHook extends \Frontend
         }
 
         // now: scan the events-array and add edit links where appropriate
-        $currentTime = $checkAuthService->getMidnightTime();
-        foreach ($events as &$intnext) {
-            foreach ($intnext as &$intdate) {
-                foreach ($intdate as &$event) {
+        foreach ($events as &$date) {
+            foreach ($date as &$timestamp) {
+                foreach ($timestamp as &$event) {
                     $pid = $event['pid'];
-                    if ($this->User->id !== null && $calendarObjects[$pid]->AllowEdit && $checkAuthService->areEditLinksAllowed($calendarObjects[$pid], $event, $this->User->id, $isUserAdminForCalendar[$pid], $isUserMemberForCalendar[$pid])) {
+                    if ($this->User->id !== null && $calendarObjects[$pid]->AllowEdit === '1' && $checkAuthService->areEditLinksAllowed($calendarObjects[$pid], $event, $this->User->id, $isUserAdminForCalendar[$pid], $isUserMemberForCalendar[$pid])) {
                         $this->addEditLinks($event, $jumpPages[$pid]);
-                        var_dump($event['editRef']);
                     }
                 }
             }
         }
+
         return $events;
     }
 }

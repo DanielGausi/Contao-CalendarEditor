@@ -54,7 +54,7 @@
 			<?php if ($this->fields['captcha']): ?>
 				<?php $objWidget = $this->fields['captcha']; ?>		
 				<?= $objWidget->parse() ?>
-				<tr class="<?php echo $class; ?>">
+				<tr>
 					<td class="label">
 						<?php echo $objWidget->generateQuestion(); 
 							echo '<span class="mandatory">*</span>';?></td>
@@ -62,7 +62,7 @@
 				</tr>			
 			<?php endif; ?>
 					
-			<tr class="<?php echo $class; ?>">
+			<tr>
 				<td class="label">&nbsp;</td>
 				<td class="value"><input type="submit" class="submit" value="<?php echo $this->submit; ?>" /></td>
 			</tr>

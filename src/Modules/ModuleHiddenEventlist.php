@@ -102,8 +102,6 @@ class ModuleHiddenEventlist extends \ModuleEventlist
             ksort($this->arrEvents[$key]);
         }
 
-        //$this->arrEvents = $this->ListAllEvents_Hook->updateAllEvents($this->arrEvents, $arrCalendars, $intStart, $intEnd, $this);
-
         // HOOK: modify result set
         if (isset($GLOBALS['TL_HOOKS']['getAllEvents']) && is_array($GLOBALS['TL_HOOKS']['getAllEvents'])) {
             foreach ($GLOBALS['TL_HOOKS']['getAllEvents'] as $callback) {
