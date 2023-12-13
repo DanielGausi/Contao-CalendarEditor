@@ -408,38 +408,20 @@ class ModuleEventEditor extends \Events
         return $varValue;
     }
 
-    public function saveToDB($eventData, $OldId, $contentData, $OldContentID)
+    public function saveToDB($eventData, $oldId, array $contentData, $oldContentId)
     {
-        // get current max. ID in tl_calendar_events (needed for new alias)
-        //$maxI = $this->Database->prepare("SELECT MAX(id) as id FROM tl_calendar_events")
-        //						->limit(1)
-        //						->execute();
-        //$newID = $maxI->id + 1;
-
-        $returnID = 0;
-
-        if ($OldId === '') {
+        if ($oldId === '') {
             // create new alias
-            $eventData['alias'] = $this->generateAlias($eventData['title']);    //, $newID);
+            $eventData['alias'] = $this->generateAlias($eventData['title']);
         }
-        //else {
-        // use existing alias
-        //	$alias = $eventData['alias'];
-        //}
-        //$eventData['alias'] = $alias;
 
         // important (otherwise details/teaser will be mixed up in calendars or event lists)
         $eventData['source'] = 'default';
-
-        //$search  = array('&#60;','&#61;','&#62;');
-        //$replace = array('<','=', '>');
-        //$det = str_replace($search, $replace, $contentData['text']);
 
         // needed later!
         $startDate = new \Date($eventData['startDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
 
         $eventData['tstamp'] = $startDate->tstamp;
-        // $contentData['text'] = $det;
 
         // Dealing with empty enddates, Start/endtimes ...
         if (trim($eventData['endDate']) != '') {
@@ -465,8 +447,7 @@ class ModuleEventEditor extends \Events
             // Add time to the event
             $useTime = true;
             $eventData['addTime'] = '1';
-            $s = $eventData['startDate'] . ' ' . $eventData['startTime'];
-            $startTime = new \Date($s, $GLOBALS['TL_CONFIG']['dateFormat'] . ' ' . $GLOBALS['TL_CONFIG']['timeFormat']);
+            $startTime = new \Date($eventData['startDate'] . ' ' . $eventData['startTime'], $GLOBALS['TL_CONFIG']['dateFormat'] . ' ' . $GLOBALS['TL_CONFIG']['timeFormat']);
             $eventData['startTime'] = $startTime->tstamp;
         }
 
@@ -474,17 +455,15 @@ class ModuleEventEditor extends \Events
 
         if (trim($eventData['endTime']) == '') {
             // if no endtime is given: set endtime = starttime
-            $s = $endDateStr . ' ' . $startTimeStr;
-            $endTime = new \Date($s, $GLOBALS['TL_CONFIG']['datimFormat']);
-            $eventData['endTime'] = $endTime->tstamp;
+            $dateString = $endDateStr . ' ' . $startTimeStr;
         } else {
             if (!$useTime) {
                 $eventData['endTime'] = strtotime($endDateStr . ' ' . $eventData['endTime']);
             }
-            $s = $endDateStr . ' ' . $eventData['endTime'];
-            $endTime = new \Date($s, $GLOBALS['TL_CONFIG']['datimFormat']);
-            $eventData['endTime'] = $endTime->tstamp;
+            $dateString = $endDateStr . ' ' . $eventData['endTime'];
         }
+        $endTime = new \Date($dateString, $GLOBALS['TL_CONFIG']['datimFormat']);
+        $eventData['endTime'] = $endTime->tstamp;
 
 
         // here: CALL Hooks with $eventData
@@ -495,16 +474,16 @@ class ModuleEventEditor extends \Events
             }
         }
 
-        if ($OldId === '') {
+        if ($oldId === '') {
             // create new entry
             $new_cid = $this->Database->prepare('INSERT INTO tl_calendar_events %s')->set($eventData)->execute()->insertId;
             $contentData['pid'] = $new_cid;
             $returnID = $new_cid;
         } else {
             // update existing entry
-            $objUpdate = $this->Database->prepare("UPDATE tl_calendar_events %s WHERE id=?")->set($eventData)->execute($OldId);
-            $contentData['pid'] = $OldId;
-            $returnID = $OldId;
+            $this->Database->prepare("UPDATE tl_calendar_events %s WHERE id=?")->set($eventData)->execute($oldId);
+            $contentData['pid'] = $oldId;
+            $returnID = $oldId;
         }
 
         $contentData['ptable'] = 'tl_calendar_events';
@@ -512,20 +491,20 @@ class ModuleEventEditor extends \Events
         // set the headline in the Content Element to ""
         $contentData['headline'] = 'a:2:{s:4:"unit";s:2:"h1";s:5:"value";s:0:"";}';
 
-        if ($contentData['text']) {
+        if (isset($contentData['text'])) {
             // content 'text' is set, so we need to write something into the Database
-            if ($OldContentID === '') {
+            if ($oldContentId === '') {
                 // create new entry
                 $contentData['tstamp'] = time();
-                $objInsert = $this->Database->prepare('INSERT INTO tl_content %s')->set($contentData)->execute();
+                $this->Database->prepare('INSERT INTO tl_content %s')->set($contentData)->execute();
             } else {
                 // update existing entry
-                $objUpdate = $this->Database->prepare("UPDATE tl_content %s WHERE id=?")->set($contentData)->execute($OldContentID);
+                $this->Database->prepare("UPDATE tl_content %s WHERE id=?")->set($contentData)->execute($oldContentId);
             }
         } else {
             // content is empty, so we need to delete the existing content element
-            if ($OldContentID) {
-                $objDelete = $this->Database->prepare("DELETE FROM tl_content WHERE id=?")->execute($OldContentID);
+            if ($oldContentId) {
+                $this->Database->prepare("DELETE FROM tl_content WHERE id=?")->execute($oldContentId);
             }
         }
         $this->import('Calendar');
@@ -1137,22 +1116,22 @@ class ModuleEventEditor extends \Events
         // Initialize widgets
         $arrWidgets = array();
         $doNotSubmit = false;
-        foreach ($fields as $arrField) {
-            $strClass = $GLOBALS['TL_FFL'][$arrField['inputType']];
-            $arrField['eval']['required'] = $arrField['eval']['mandatory'];
+        foreach ($fields as $field) {
+            $strClass = $GLOBALS['TL_FFL'][$field['inputType']];
+            $field['eval']['required'] = $field['eval']['mandatory'];
 
             // from http://pastebin.com/HcjkHLQK
             // via https://github.com/contao/core/issues/5086
             // Convert date formats into timestamps (check the eval setting first -> #3063)
-            if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
-                $rgxp = $arrField['eval']['rgxp'];
-                if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $arrField['value'] != '') {
-                    $objDate = new \Date($varValue, $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
-                    $arrField['value'] = $objDate->tstamp;
+            if (Input::post('FORM_SUBMIT') === 'caledit_submit') {
+                $rgxp = $field['eval']['rgxp'] ?? '';
+                if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $field['value'] != '') {
+                    $objDate = new \Date(Input::post($field['name']), $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+                    $field['value'] = $objDate->tstamp;
                 }
             }
 
-            $objWidget = new $strClass($this->prepareForWidget($arrField, $arrField['name'], $arrField['value']));
+            $objWidget = new $strClass($this->prepareForWidget($field, $field['name'], $field['value']));
             // Validate widget
             if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
                 $objWidget->validate();
@@ -1160,7 +1139,7 @@ class ModuleEventEditor extends \Events
                     $doNotSubmit = true;
                 }
             }
-            $arrWidgets[$arrField['name']] = $objWidget;
+            $arrWidgets[$field['name']] = $objWidget;
         }
 
         // Contao 4.4+: The CalendarFields need to be parsed to activate JS
@@ -1206,10 +1185,6 @@ class ModuleEventEditor extends \Events
             $currentEventData['published'] = $published;
             if (is_null($currentEventData['published'])) {
                 $currentEventData['published'] = '';
-            }
-
-            if (is_null($NewEventData['location'])) {
-                $NewEventData['location'] = '';
             }
 
             // convert the existing timestamps into Strings, so that PutinDB can use them again
