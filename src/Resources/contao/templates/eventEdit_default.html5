@@ -54,126 +54,67 @@
         <form action="<?php echo $this->action; ?>" method="post">
         <input type="hidden" name="FORM_SUBMIT" value="caledit_submit" /><?php echo $this->messages; ?>
 		<input type="hidden" name="REQUEST_TOKEN" value="{{request_token}}">
-		<table cellpadding="2" cellspacing="2" border="0" >
-		<tbody>
-						
+
 			<?php if ($this->fields['startDate']): ?>
-				<?php $objWidget = $this->fields['startDate']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['startDate']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['endDate']): ?>
-				<?php $objWidget = $this->fields['endDate']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['endDate']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['startTime']): ?>
-				<?php $objWidget = $this->fields['startTime']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['startTime']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['endTime']): ?>
-				<?php $objWidget = $this->fields['endTime']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['endTime']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['title']): ?>
-				<?php $objWidget = $this->fields['title']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['title']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['cssClass']): ?>
-				<?php $objWidget = $this->fields['cssClass']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['cssClass']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['location']): ?>
-				<?php $objWidget = $this->fields['location']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['location']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['teaser']): ?>
-				<?php $objWidget = $this->fields['teaser']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['teaser']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if ($this->fields['details']): ?>
-				<?php $objWidget = $this->fields['details']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['details']->parse() ?>
 			<?php endif; ?>
 			
-			<?php if ($this->fields['published']): ?>				
-				<?php $objWidget = $this->fields['published']; ?>				
-				<tr>
-					<td class="label">&nbsp;</td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+			<?php if ($this->fields['published']): ?>
+				<?= $this->fields['published']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if (isset($this->fields['saveAs']) && $this->fields['saveAs']): ?>
-				<?php $objWidget = $this->fields['saveAs']; ?>				
-				<tr>
-					<td class="label">&nbsp;</td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['saveAs']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if (isset($this->fields['pid']) && $this->fields['pid']): ?>
-				<?php $objWidget = $this->fields['pid']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['pid']->parse() ?>
 			<?php endif; ?>
 			
 			<?php if (isset($this->fields['captcha']) && $this->fields['captcha']): ?>
-				<?php $objWidget = $this->fields['captcha']; ?>	
-				<?= $objWidget->parse() ?>
+				<?= $this->fields['captcha']->parse() ?>
 			<?php endif; ?>
 					
-			<tr>
-				<td class="label">&nbsp;</td>
-				<td class="value"><input type="submit" class="submit" value="<?php echo $this->submit; ?>" /></td>
-			</tr>
+			<div>
+				<input type="submit" class="submit" value="<?php echo $this->submit; ?>" />
+			</div>
 			
 			<?php if ($this->fields['jumpToSelection']): ?>
-				<?php $objWidget = $this->fields['jumpToSelection']; ?>				
-				<tr>
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+				<?= $this->fields['jumpToSelection']->parse() ?>
 			<?php endif; ?>
-			
-				
-		</tbody>
-		</table>       
+
         </form>
 </div>
 </div>

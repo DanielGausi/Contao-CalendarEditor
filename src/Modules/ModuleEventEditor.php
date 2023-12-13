@@ -369,8 +369,6 @@ class ModuleEventEditor extends \Events
         if ($this->caledit_dateImageSRC) {
             $field['eval']['dateImageSRC'] = $this->caledit_dateImageSRC;
         }
-
-
     }
 
     public function AliasExists($suggestedAlias)
@@ -1092,11 +1090,9 @@ class ModuleEventEditor extends \Events
                 'eval' => array('rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true)
             );
 
-            if (version_compare(VERSION . '.' . BUILD, '4.4.0', '>=')) {
-                if ($this->caledit_useDatePicker) {
-                    $this->addDatePicker($fields['start' . $i]);
-                    $this->addDatePicker($fields['end' . $i]);
-                }
+            if ($this->caledit_useDatePicker) {
+                $this->addDatePicker($fields['start' . $i]);
+                $this->addDatePicker($fields['end' . $i]);
             }
         }
 
@@ -1167,12 +1163,10 @@ class ModuleEventEditor extends \Events
             $arrWidgets[$arrField['name']] = $objWidget;
         }
 
-        if (version_compare(VERSION . '.' . BUILD, '4.4.0', '>=')) {
-            // Contao 4.4+: The CalendarFields need to be parsed to activate JS
-            for ($i = 1; $i <= 10; $i++) {
-                $arrWidgets['start' . $i]->parse();
-                $arrWidgets['end' . $i]->parse();
-            }
+        // Contao 4.4+: The CalendarFields need to be parsed to activate JS
+        for ($i = 1; $i <= 10; $i++) {
+            $arrWidgets['start' . $i]->parse();
+            $arrWidgets['end' . $i]->parse();
         }
 
         $allDatesAllowed = $this->allDatesAllowed($currentEventData['pid']);
