@@ -316,28 +316,28 @@ class ModuleEventEditor extends \Events
     }
 
 
-    public function getEventInformation($currentEventObject, &$NewEventData)
+    public function getEventInformation($currentEventObject, &$newEventData): void
     {
         // Fill fields with data from $currentEventObject
-        $NewEventData['startDate'] = $currentEventObject->startDate;
-        $NewEventData['endDate'] = $currentEventObject->endDate;
+        $newEventData['startDate'] = $currentEventObject->startDate;
+        $newEventData['endDate'] = $currentEventObject->endDate;
         if ($currentEventObject->addTime) {
-            $NewEventData['startTime'] = $currentEventObject->startTime;
-            $NewEventData['endTime'] = $currentEventObject->endTime;
-            if ($NewEventData['startTime'] == $NewEventData['endTime']) {
-                $NewEventData['endTime'] = '';
+            $newEventData['startTime'] = $currentEventObject->startTime;
+            $newEventData['endTime'] = $currentEventObject->endTime;
+            if ($newEventData['startTime'] == $newEventData['endTime']) {
+                $newEventData['endTime'] = '';
             }
         } else {
-            $NewEventData['startTime'] = '';
-            $NewEventData['endTime'] = '';
+            $newEventData['startTime'] = '';
+            $newEventData['endTime'] = '';
         }
-        $NewEventData['title'] = $currentEventObject->title;
-        $NewEventData['teaser'] = $currentEventObject->teaser;
-        $NewEventData['location'] = $currentEventObject->location;
-        $NewEventData['cssClass'] = $currentEventObject->cssClass;
-        $NewEventData['pid'] = $currentEventObject->pid;
-        $NewEventData['published'] = $currentEventObject->published;
-        $NewEventData['alias'] = $currentEventObject->alias;
+        $newEventData['title'] = $currentEventObject->title;
+        $newEventData['teaser'] = $currentEventObject->teaser;
+        $newEventData['location'] = $currentEventObject->location;
+        $newEventData['cssClass'] = $currentEventObject->cssClass;
+        $newEventData['pid'] = $currentEventObject->pid;
+        $newEventData['published'] = $currentEventObject->published;
+        $newEventData['alias'] = $currentEventObject->alias;
 
         $this->Template->CurrentTitle = $currentEventObject->title;
         $this->Template->CurrentDate = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $currentEventObject->startDate);
@@ -352,7 +352,7 @@ class ModuleEventEditor extends \Events
         }
     }
 
-    public function addDatePicker(&$field)
+    public function addDatePicker(&$field): void
     {
         $field['inputType'] = 'calendarfield';
         if (strlen($this->caledit_dateIncludeCSSTheme) > 0) {
@@ -371,24 +371,24 @@ class ModuleEventEditor extends \Events
         }
     }
 
-    public function AliasExists($suggestedAlias)
+    public function aliasExists($suggestedAlias): bool
     {
         $objAlias = $this->Database->prepare("SELECT id FROM tl_calendar_events WHERE alias=?")
             ->execute($suggestedAlias);
         if ($objAlias->numRows) {
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
-    public function generateAlias($varValue)
+    public function generateAlias($value): string
     {
         // maximum length of alias in the DB: 128 chars
         // we use only 110 chars here, as we may add "-<ID>" in case of a collision
-        $varValue = substr(standardize($varValue), 0, 110);
+        $value = substr(standardize($value), 0, 110);
 
-        if ($this->AliasExists($varValue)) {
+        if ($this->aliasExists($value)) {
             // alias already exists, we have to modify it.
             // 1st try: Add the ID of the event (which is currently not in the DB, therefore +1 at the end)
             $maxI = $this->Database->prepare("SELECT MAX(id) as id FROM tl_calendar_events")
@@ -396,16 +396,16 @@ class ModuleEventEditor extends \Events
                 ->execute();
             $newID = $maxI->id + 1;
 
-            $varValue .= '-' . $newID;
+            $value .= '-' . $newID;
             // if even this modified alias exists: use random alias, with ID as prefix
             // we do not increase the ID here, nor do we add another random number,
             // as there may be some issues with the maximum length of the alias (?)
-            while ($this->AliasExists($varValue)) {
+            while ($this->aliasExists($value)) {
                 $randID = mt_rand();
-                $varValue = $newID . '-' . $randID;
+                $value = $newID . '-' . $randID;
             }
         }
-        return $varValue;
+        return $value;
     }
 
     public function saveToDB($eventData, $oldId, array $contentData, $oldContentId)
@@ -514,7 +514,7 @@ class ModuleEventEditor extends \Events
     }
 
 
-    protected function handleEdit($editID, $currentEventObject)
+    protected function handleEdit($editID, $currentEventObject): void
     {
         $this->strTemplate = $this->caledit_template;
 
@@ -523,9 +523,9 @@ class ModuleEventEditor extends \Events
         // 1. Get Data from post/get
         $newDate = $this->Input->get('add');
 
-        $NewEventData = [];
+        $newEventData = [];
         $NewContentData = [];
-        $NewEventData['startDate'] = $newDate;
+        $newEventData['startDate'] = $newDate;
 
         $published = $currentEventObject?->published;
 
@@ -533,7 +533,7 @@ class ModuleEventEditor extends \Events
             // get a proper Content-Element
             $this->getContentElements($editID, $contentID, $NewContentData);
             // get the rest of the event data
-            $this->getEventInformation($currentEventObject, $NewEventData);
+            $this->getEventInformation($currentEventObject, $newEventData);
 
             if ($this->caledit_allowDelete) {
                 // add a "Delete this event"-Link
@@ -566,17 +566,17 @@ class ModuleEventEditor extends \Events
 
         // after this: Overwrite it with the post data
         if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
-            $NewEventData['startDate'] = $this->Input->post('startDate');
-            $NewEventData['endDate'] = $this->Input->post('endDate');
-            $NewEventData['startTime'] = $this->Input->post('startTime');
-            $NewEventData['endTime'] = $this->Input->post('endTime');
-            $NewEventData['title'] = $this->Input->post('title');
-            $NewEventData['location'] = $this->Input->post('location');
-            $NewEventData['teaser'] = $this->Input->postHtml('teaser', true);
+            $newEventData['startDate'] = $this->Input->post('startDate');
+            $newEventData['endDate'] = $this->Input->post('endDate');
+            $newEventData['startTime'] = $this->Input->post('startTime');
+            $newEventData['endTime'] = $this->Input->post('endTime');
+            $newEventData['title'] = $this->Input->post('title');
+            $newEventData['location'] = $this->Input->post('location');
+            $newEventData['teaser'] = $this->Input->postHtml('teaser', true);
             $NewContentData['text'] = $this->Input->postHtml('details', true);
-            $NewEventData['cssClass'] = $this->Input->post('cssClass');
-            $NewEventData['pid'] = $this->Input->post('pid');
-            $NewEventData['published'] = $this->Input->post('published');
+            $newEventData['cssClass'] = $this->Input->post('cssClass');
+            $newEventData['pid'] = $this->Input->post('pid');
+            $newEventData['published'] = $this->Input->post('published');
             $saveAs = $this->Input->post('saveAs') ?? 0;
             $jumpToSelection = $this->Input->post('jumpToSelection');
 
@@ -588,12 +588,12 @@ class ModuleEventEditor extends \Events
                 return;
             }
 
-            if (empty($NewEventData['pid'])) {
+            if (empty($newEventData['pid'])) {
                 // set default value
-                $NewEventData['pid'] = $this->allowedCalendars[0]->id; //['id'];
+                $newEventData['pid'] = $this->allowedCalendars[0]->id; //['id'];
             };
 
-            if (!$this->UserIsToAddCalendar($this->User, $NewEventData['pid'])) {
+            if (!$this->UserIsToAddCalendar($this->User, $newEventData['pid'])) {
                 // this should never happen, except the FE user is manipulating
                 // the POST with some evil HackerToolz. ;-)
                 $fatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoEditAllowed'] . ' (POST data invalid)';
@@ -614,7 +614,7 @@ class ModuleEventEditor extends \Events
             'name' => 'startDate',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_startdate'],
             'inputType' => 'text', // or: 'calendarfield' (see below),
-            'value' => $NewEventData['startDate'],
+            'value' => $newEventData['startDate'],
             'eval' => array('rgxp' => 'date',
                 'mandatory' => true,
                 'decodeEntities' => true)
@@ -624,7 +624,7 @@ class ModuleEventEditor extends \Events
             'name' => 'endDate',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_enddate'],
             'inputType' => 'text',
-            'value' => $NewEventData['endDate'] ?? null,
+            'value' => $newEventData['endDate'] ?? null,
             'eval' => array('rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true)
         );
 
@@ -637,7 +637,7 @@ class ModuleEventEditor extends \Events
             'name' => 'startTime',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_starttime'],
             'inputType' => 'text',
-            'value' => $NewEventData['startTime'] ?? '',
+            'value' => $newEventData['startTime'] ?? '',
             'eval' => ['rgxp' => 'time', 'mandatory' => $mandStarttime, 'maxlength' => 128, 'decodeEntities' => true]
         ];
 
@@ -645,7 +645,7 @@ class ModuleEventEditor extends \Events
             'name' => 'endTime',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_endtime'],
             'inputType' => 'text',
-            'value' => $NewEventData['endTime'] ?? '',
+            'value' => $newEventData['endTime'] ?? '',
             'eval' => ['rgxp' => 'time', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true]
         ];
 
@@ -653,7 +653,7 @@ class ModuleEventEditor extends \Events
             'name' => 'title',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_title'],
             'inputType' => 'text',
-            'value' => $NewEventData['title'] ?? '',
+            'value' => $newEventData['title'] ?? '',
             'eval' => ['mandatory' => true, 'maxlength' => 255, 'decodeEntities' => true]
         ];
 
@@ -661,7 +661,7 @@ class ModuleEventEditor extends \Events
             'name' => 'location',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_location'],
             'inputType' => 'text',
-            'value' => $NewEventData['location'] ?? '',
+            'value' => $newEventData['location'] ?? '',
             'eval' => ['mandatory' => $mandLocation, 'maxlength' => 255, 'decodeEntities' => true]
         ];
 
@@ -669,7 +669,7 @@ class ModuleEventEditor extends \Events
             'name' => 'teaser',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_teaser'],
             'inputType' => 'textarea',
-            'value' => $NewEventData['teaser'] ?? '',
+            'value' => $newEventData['teaser'] ?? '',
             'eval' => ['mandatory' => $mandTeaser, 'rte' => 'tinyMCE', 'allowHtml' => true]
         ];
 
@@ -694,7 +694,7 @@ class ModuleEventEditor extends \Events
                 'label' => $GLOBALS['TL_LANG']['MSC']['caledit_pid'],
                 'inputType' => 'select',
                 'options' => $popt,
-                'value' => $NewEventData['pid'] ?? $cal->id,
+                'value' => $newEventData['pid'] ?? $cal->id,
                 'reference' => $pref,
                 'eval' => ['mandatory' => true]
             ];
@@ -721,7 +721,7 @@ class ModuleEventEditor extends \Events
                 'label' => $cssLabel,
                 'inputType' => 'select',
                 'options' => $opt,
-                'value' => $NewEventData['cssClass'] ?? '',
+                'value' => $newEventData['cssClass'] ?? '',
                 'reference' => $ref,
                 'eval' => ['mandatory' => $mandCss, 'includeBlankOption' => true, 'maxlength' => 128, 'decodeEntities' => true]
             ];
@@ -730,7 +730,7 @@ class ModuleEventEditor extends \Events
                 'name' => 'cssClass',
                 'label' => $cssLabel,
                 'inputType' => 'text',
-                'value' => $NewEventData['cssClass'] ?? '',
+                'value' => $newEventData['cssClass'] ?? '',
                 'eval' => ['mandatory' => $mandCss, 'maxlength' => 128, 'decodeEntities' => true]
             ];
         }
@@ -740,7 +740,7 @@ class ModuleEventEditor extends \Events
                 'name' => 'published',
                 'label' => '', // $GLOBALS['TL_LANG']['MSC']['caledit_published'],
                 'inputType' => 'checkbox',
-                'value' => $NewEventData['published'] ?? ''
+                'value' => $newEventData['published'] ?? ''
             ];
             $fields['published']['options']['1'] = $GLOBALS['TL_LANG']['MSC']['caledit_published'];
         }
@@ -786,9 +786,9 @@ class ModuleEventEditor extends \Events
         if (array_key_exists('buildCalendarEditForm', $GLOBALS['TL_HOOKS']) && is_array($GLOBALS['TL_HOOKS']['buildCalendarEditForm'])) {
             foreach ($GLOBALS['TL_HOOKS']['buildCalendarEditForm'] as $key => $callback) {
                 $this->import($callback[0]);
-                $arrResult = $this->{$callback[0]}->{$callback[1]}($NewEventData, $fields, $currentEventObject, $editID);
+                $arrResult = $this->{$callback[0]}->{$callback[1]}($newEventData, $fields, $currentEventObject, $editID);
                 if (is_array($arrResult) && count($arrResult) > 1) {
-                    $NewEventData = $arrResult['NewEventData'];
+                    $newEventData = $arrResult['NewEventData'];
                     $fields = $arrResult['fields'];
                 }
             }
@@ -832,7 +832,7 @@ class ModuleEventEditor extends \Events
         //$tmpStartDate = strtotime($arrWidgets['startDate']->__get('value'));
         //$tmpEndDate = strtotime($arrWidgets['endDate']->__get('value'));
 
-        $validDate = $this->checkValidDate($NewEventData['pid'] ?? 0, $arrWidgets['startDate'], $arrWidgets['endDate']);
+        $validDate = $this->checkValidDate($newEventData['pid'] ?? 0, $arrWidgets['startDate'], $arrWidgets['endDate']);
         if (!$validDate) {
             // modification of the widget is done in checkValidDate
             $doNotSubmit = true;
@@ -845,31 +845,31 @@ class ModuleEventEditor extends \Events
             // everything seems to be ok, so we can add the POST Data
             // into the Database
             if (!FE_USER_LOGGED_IN) {
-                $NewEventData['fe_user'] = ''; // no user
+                $newEventData['fe_user'] = ''; // no user
             } else {
-                $NewEventData['fe_user'] = $this->User->id; // set the FE_user here
+                $newEventData['fe_user'] = $this->User->id; // set the FE_user here
             }
 
-            if (is_null($NewEventData['published'])) {
-                $NewEventData['published'] = '';
+            if (is_null($newEventData['published'])) {
+                $newEventData['published'] = '';
             }
 
-            if (is_null($NewEventData['location'])) {
-                $NewEventData['location'] = '';
+            if (is_null($newEventData['location'])) {
+                $newEventData['location'] = '';
             }
 
             if ($saveAs === 0) {
-                $DBid = $this->saveToDB($NewEventData, '', $NewContentData, '');
+                $DBid = $this->saveToDB($newEventData, '', $NewContentData, '');
             } else {
-                $DBid = $this->saveToDB($NewEventData, $editID, $NewContentData, $contentID);
+                $DBid = $this->saveToDB($newEventData, $editID, $NewContentData, $contentID);
             }
 
             // Send Notification EMail
             if ($this->caledit_sendMail) {
                 if ($saveAs) {
-                    $this->SendNotificationMail($NewEventData, '', $this->User->username, '');
+                    $this->sendNotificationMail($newEventData, '', $this->User->username, '');
                 } else {
-                    $this->SendNotificationMail($NewEventData, $editID, $this->User->username, '');
+                    $this->sendNotificationMail($newEventData, $editID, $this->User->username, '');
                 }
             }
 
@@ -886,7 +886,7 @@ class ModuleEventEditor extends \Events
         }
     }
 
-    protected function HandleDelete($currentEventObject)
+    protected function handleDelete($currentEventObject)
     {
         $this->strTemplate = $this->caledit_delete_template;
         $this->Template = new \FrontendTemplate($this->strTemplate);
@@ -976,7 +976,7 @@ class ModuleEventEditor extends \Events
 
             // Send Notification EMail
             if ($this->caledit_sendMail) {
-                $this->SendNotificationMail($oldEventData, -1, $this->User->username, '');
+                $this->sendNotificationMail($oldEventData, -1, $this->User->username, '');
             }
 
             $this->generateRedirect('', ''); // jump to the default page
@@ -986,12 +986,11 @@ class ModuleEventEditor extends \Events
                 $this->Template->InfoClass = 'tl_error';
                 $this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'];
             }
-            $this->Template->fields = $arrWidgets;
         }
         $this->Template->fields = $arrWidgets;
     }
 
-    protected function HandleClone($currentEventObject)
+    protected function handleClone($currentEventObject)
     {
         $this->strTemplate = $this->caledit_clone_template;
         $this->Template = new \FrontendTemplate($this->strTemplate);
@@ -1215,7 +1214,7 @@ class ModuleEventEditor extends \Events
             $currentEventData['endDate'] = $originalEnd;
             // Send Notification EMail
             if ($this->caledit_sendMail) {
-                $this->SendNotificationMail($currentEventData, $currentID, $this->User->username, $newDatesMail);
+                $this->sendNotificationMail($currentEventData, $currentID, $this->User->username, $newDatesMail);
             }
 
             // after this: jump to "jumpTo-Page"
@@ -1232,7 +1231,7 @@ class ModuleEventEditor extends \Events
     }
 
 
-    protected function SendNotificationMail($NewEventData, $editID, $User, $cloneDates)
+    protected function sendNotificationMail($NewEventData, $editID, $User, $cloneDates)
     {
         $Notification = new \Contao\Email();
         $Notification->from = $GLOBALS['TL_ADMIN_EMAIL'];
@@ -1330,12 +1329,12 @@ class ModuleEventEditor extends \Events
 
         // ok, the user is an authorized user
         if ($deleteID) {
-            $this->HandleDelete($currentEventObject);
+            $this->handleDelete($currentEventObject);
             return;
         }
 
         if ($cloneID) {
-            $this->HandleClone($currentEventObject);
+            $this->handleClone($currentEventObject);
             return;
         }
 
