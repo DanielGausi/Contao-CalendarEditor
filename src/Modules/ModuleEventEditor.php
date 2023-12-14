@@ -2,14 +2,20 @@
 
 namespace DanielGausi\CalendarEditorBundle\Modules;
 
+use BackendTemplate;
+use Contao\Email;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
+use ContentModel;
 use DanielGausi\CalendarEditorBundle\Models\CalendarEventsModelEdit;
 use DanielGausi\CalendarEditorBundle\Models\CalendarModelEdit;
 use DanielGausi\CalendarEditorBundle\Services\CheckAuthService;
+use Date;
+use Events;
+use FrontendTemplate;
 
-class ModuleEventEditor extends \Events
+class ModuleEventEditor extends Events
 {
     /**
      * Template
@@ -26,7 +32,7 @@ class ModuleEventEditor extends \Events
     public function generate()
     {
         if (TL_MODE == 'BE') {
-            $objTemplate = new \BackendTemplate('be_wildcard');
+            $objTemplate = new BackendTemplate('be_wildcard');
             $objTemplate->wildcard = '### EVENT EDITOR ###';
             $objTemplate->title = $this->headline;
             $objTemplate->id = $this->id;
@@ -234,60 +240,53 @@ class ModuleEventEditor extends \Events
         }
     }
 
-    public function generateRedirect($userSetting, $DBid)
+    public function generateRedirect($userSetting, $DBid): void
     {
+        $jumpTo = preg_replace('/\?.*$/i', '', $this->Environment->request);
+
         switch ($userSetting) {
             case "":
-                $jt = preg_replace('/\?.*$/i', '', $this->Environment->request);
                 // Get current "jumpTo" page
                 $objPage = $this->Database->prepare("SELECT * FROM tl_page WHERE id=?")
                     ->limit(1)
                     ->execute($this->jumpTo);
 
                 if ($objPage->numRows) {
-                    $jt = $this->generateFrontendUrl($objPage->row());
+                    $jumpTo = $this->generateFrontendUrl($objPage->row());
                 }
-                $this->redirect($jt, 301);
                 break;
 
             case "new":
-                $jt = preg_replace('/\?.*$/i', '', $this->Environment->request);
-                $this->redirect($jt, 301);
                 break;
 
             case "view":
                 $currentEventObject = CalendarEventsModelEdit::findByIdOrAlias($DBid);
 
                 if ($currentEventObject->published) {
-                    $jt = $this->generateEventUrl($currentEventObject);
-                    $this->redirect($jt, 301);
+                    $jumpTo = $this->generateEventUrl($currentEventObject);
                 } else {
                     // event is not published, so show it in the editor again
-                    $jt = preg_replace('/\?.*$/i', '', $this->Environment->request);
-                    $jt .= '?edit=' . $DBid;
-                    $this->redirect($jt, 301);
+                    $jumpTo .= '?edit=' . $DBid;
                 }
                 break;
 
             case "edit":
-                $jt = preg_replace('/\?.*$/i', '', $this->Environment->request);
-                $jt .= '?edit=' . $DBid;
-                $this->redirect($jt, 301);
+                $jumpTo .= '?edit=' . $DBid;
                 break;
 
             case "clone":
-                $jt = preg_replace('/\?.*$/i', '', $this->Environment->request);
-                $jt .= '?clone=' . $DBid;
-                $this->redirect($jt, 301);
+                $jumpTo .= '?clone=' . $DBid;
                 break;
         }
+
+        $this->redirect($jumpTo, 301);
     }
 
 
-    public function getContentElements($eventID, &$contentID, &$contentData)
+    public function getContentElements($eventID, &$contentID, &$contentData): void
     {
         // get Content Elements
-        $objElement = \ContentModel::findPublishedByPidAndTable($eventID, 'tl_calendar_events');
+        $objElement = ContentModel::findPublishedByPidAndTable($eventID, 'tl_calendar_events');
 
         // analyse content elements:
         // we will use the first element of type "text", discard the others (but set a warning in the template)
@@ -419,7 +418,7 @@ class ModuleEventEditor extends \Events
         $eventData['source'] = 'default';
 
         // needed later!
-        $startDate = new \Date($eventData['startDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
+        $startDate = new Date($eventData['startDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
 
         $eventData['tstamp'] = $startDate->tstamp;
 
@@ -427,7 +426,7 @@ class ModuleEventEditor extends \Events
         if (trim($eventData['endDate']) != '') {
             // an enddate is given
             $endDateStr = $eventData['endDate'];
-            $endDate = new \Date($eventData['endDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
+            $endDate = new Date($eventData['endDate'], $GLOBALS['TL_CONFIG']['dateFormat']);
             $eventData['endDate'] = $endDate->tstamp;
         } else {
             // needed later
@@ -447,7 +446,7 @@ class ModuleEventEditor extends \Events
             // Add time to the event
             $useTime = true;
             $eventData['addTime'] = '1';
-            $startTime = new \Date($eventData['startDate'] . ' ' . $eventData['startTime'], $GLOBALS['TL_CONFIG']['dateFormat'] . ' ' . $GLOBALS['TL_CONFIG']['timeFormat']);
+            $startTime = new Date($eventData['startDate'] . ' ' . $eventData['startTime'], $GLOBALS['TL_CONFIG']['dateFormat'] . ' ' . $GLOBALS['TL_CONFIG']['timeFormat']);
             $eventData['startTime'] = $startTime->tstamp;
         }
 
@@ -462,7 +461,7 @@ class ModuleEventEditor extends \Events
             }
             $dateString = $endDateStr . ' ' . $eventData['endTime'];
         }
-        $endTime = new \Date($dateString, $GLOBALS['TL_CONFIG']['datimFormat']);
+        $endTime = new Date($dateString, $GLOBALS['TL_CONFIG']['datimFormat']);
         $eventData['endTime'] = $endTime->tstamp;
 
 
@@ -518,7 +517,7 @@ class ModuleEventEditor extends \Events
     {
         $this->strTemplate = $this->caledit_template;
 
-        $this->Template = new \FrontendTemplate($this->strTemplate);
+        $this->Template = new FrontendTemplate($this->strTemplate);
 
         // 1. Get Data from post/get
         $newDate = $this->Input->get('add');
@@ -591,7 +590,7 @@ class ModuleEventEditor extends \Events
             if (empty($newEventData['pid'])) {
                 // set default value
                 $newEventData['pid'] = $this->allowedCalendars[0]->id; //['id'];
-            };
+            }
 
             if (!$this->UserIsToAddCalendar($this->User, $newEventData['pid'])) {
                 // this should never happen, except the FE user is manipulating
@@ -609,24 +608,24 @@ class ModuleEventEditor extends \Events
         $mandStarttime = (is_array($mandfields) && array_intersect(array('starttime'), $mandfields));
         $mandCss = (is_array($mandfields) && array_intersect(array('css'), $mandfields));
         // fill template with fields ...
-        $fields = array();
-        $fields['startDate'] = array(
+        $fields = [];
+        $fields['startDate'] = [
             'name' => 'startDate',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_startdate'],
             'inputType' => 'text', // or: 'calendarfield' (see below),
             'value' => $newEventData['startDate'],
-            'eval' => array('rgxp' => 'date',
+            'eval' => ['rgxp' => 'date',
                 'mandatory' => true,
-                'decodeEntities' => true)
-        );
+                'decodeEntities' => true]
+        ];
 
-        $fields['endDate'] = array(
+        $fields['endDate'] = [
             'name' => 'endDate',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_enddate'],
             'inputType' => 'text',
             'value' => $newEventData['endDate'] ?? null,
-            'eval' => array('rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true)
-        );
+            'eval' => ['rgxp' => 'date', 'mandatory' => false, 'maxlength' => 128, 'decodeEntities' => true]
+        ];
 
         if ($this->caledit_useDatePicker) {
             $this->addDatePicker($fields['startDate']);
@@ -808,7 +807,7 @@ class ModuleEventEditor extends \Events
             if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
                 $rgxp = $field['eval']['rgxp'] ?? '';
                 if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $field['value'] != '') {
-                    $objDate = new \Date(Input::post($field['name']), $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+                    $objDate = new Date(Input::post($field['name']), $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
                     $field['value'] = $objDate->tstamp;
                 }
             }
@@ -859,9 +858,9 @@ class ModuleEventEditor extends \Events
             }
 
             if ($saveAs === 0) {
-                $DBid = $this->saveToDB($newEventData, '', $NewContentData, '');
+                $dbId = $this->saveToDB($newEventData, '', $NewContentData, '');
             } else {
-                $DBid = $this->saveToDB($newEventData, $editID, $NewContentData, $contentID);
+                $dbId = $this->saveToDB($newEventData, $editID, $NewContentData, $contentID);
             }
 
             // Send Notification EMail
@@ -873,7 +872,7 @@ class ModuleEventEditor extends \Events
                 }
             }
 
-            $this->generateRedirect($jumpToSelection, $DBid);
+            $this->generateRedirect($jumpToSelection, $dbId);
         } else {
             // Do NOT Submit
             if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
@@ -889,7 +888,7 @@ class ModuleEventEditor extends \Events
     protected function handleDelete($currentEventObject)
     {
         $this->strTemplate = $this->caledit_delete_template;
-        $this->Template = new \FrontendTemplate($this->strTemplate);
+        $this->Template = new FrontendTemplate($this->strTemplate);
 
         if (!$this->caledit_allowDelete) {
             $this->Template->FatalError = $GLOBALS['TL_LANG']['MSC']['caledit_NoDelete'];
@@ -935,7 +934,7 @@ class ModuleEventEditor extends \Events
             'eval' => ['mandatory' => true, 'customTpl' => 'form_captcha_calendar-editor']
         ];
 
-        $arrWidgets = array();
+        $arrWidgets = [];
         // Initialize widgets
         $doNotSubmit = false;
         $strClass = $GLOBALS['TL_FFL'][$captchaField['inputType']];
@@ -967,9 +966,9 @@ class ModuleEventEditor extends \Events
                 'published' => $published);
 
             // Delete all content elements
-            $objDelete = $this->Database->prepare("DELETE FROM tl_content WHERE ptable='tl_calendar_events' AND pid=?")->execute($id);
+            $this->Database->prepare("DELETE FROM tl_content WHERE ptable='tl_calendar_events' AND pid=?")->execute($id);
             // Delete event itself
-            $objDelete = $this->Database->prepare("DELETE FROM tl_calendar_events WHERE id=?")->execute($id);
+            $this->Database->prepare("DELETE FROM tl_calendar_events WHERE id=?")->execute($id);
 
             $this->import('Calendar');
             $this->Calendar->generateFeed($pid);
@@ -993,9 +992,8 @@ class ModuleEventEditor extends \Events
     protected function handleClone($currentEventObject)
     {
         $this->strTemplate = $this->caledit_clone_template;
-        $this->Template = new \FrontendTemplate($this->strTemplate);
+        $this->Template = new FrontendTemplate($this->strTemplate);
 
-        $pid = $currentEventObject->pid;
         $currentID = $currentEventObject->id;
         $currentEventData = array();
         $currentContentData = array();
@@ -1032,16 +1030,16 @@ class ModuleEventEditor extends \Events
         }
 
         // current event stored - prepare the formular
-        $newDates = array();
-        $fields = array();
+        $newDates = [];
+        $fields = [];
         $jumpToSelection = '';
 
         if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
             for ($i = 1; $i <= 10; $i++) {
-                $newDates['start' . $i] = $this->Input->post('start' . $i);
-                $newDates['end' . $i] = $this->Input->post('end' . $i);
+                $newDates['start' . $i] = Input::post('start' . $i);
+                $newDates['end' . $i] = Input::post('end' . $i);
             }
-            $jumpToSelection = $this->Input->post('jumpToSelection');
+            $jumpToSelection = Input::post('jumpToSelection');
         } else {
             for ($i = 1; $i <= 10; $i++) {
                 $newDates['start' . $i] = '';
@@ -1075,30 +1073,30 @@ class ModuleEventEditor extends \Events
         }
 
         if (!FE_USER_LOGGED_IN) {
-            $fields['captcha'] = array(
+            $fields['captcha'] = [
                 'name' => 'captcha',
                 'inputType' => 'captcha',
-                'eval' => array('mandatory' => true, 'customTpl' => 'form_captcha_calendar-editor')
-            );
+                'eval' => ['mandatory' => true, 'customTpl' => 'form_captcha_calendar-editor']
+            ];
         }
 
         // create jump-to-selection
-        $JumpOpts = array('new', 'view', 'edit', 'clone');
-        $JumpRefs = array(
+        $JumpOpts = ['new', 'view', 'edit', 'clone'];
+        $JumpRefs = [
             'new' => $GLOBALS['TL_LANG']['MSC']['caledit_JumpToNew'],
             'view' => $GLOBALS['TL_LANG']['MSC']['caledit_JumpToView'],
             'edit' => $GLOBALS['TL_LANG']['MSC']['caledit_JumpToEdit'],
             'clone' => $GLOBALS['TL_LANG']['MSC']['caledit_JumpToClone']
-        );
-        $fields['jumpToSelection'] = array(
+        ];
+        $fields['jumpToSelection'] = [
             'name' => 'jumpToSelection',
             'label' => $GLOBALS['TL_LANG']['MSC']['caledit_JumpWhatsNext'],
             'inputType' => 'select',
             'options' => $JumpOpts,
             'value' => $jumpToSelection,
             'reference' => $JumpRefs,
-            'eval' => array('mandatory' => false, 'includeBlankOption' => true, 'maxlength' => 128, 'decodeEntities' => true)
-        );
+            'eval' => ['mandatory' => false, 'includeBlankOption' => true, 'maxlength' => 128, 'decodeEntities' => true]
+        ];
 
         // here: CALL Hooks with $NewEventData, $currentEventObject, $fields
         if (array_key_exists('buildCalendarCloneForm', $GLOBALS['TL_HOOKS']) && is_array($GLOBALS['TL_HOOKS']['buildCalendarCloneForm'])) {
@@ -1125,7 +1123,7 @@ class ModuleEventEditor extends \Events
             if (Input::post('FORM_SUBMIT') === 'caledit_submit') {
                 $rgxp = $field['eval']['rgxp'] ?? '';
                 if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $field['value'] != '') {
-                    $objDate = new \Date(Input::post($field['name']), $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
+                    $objDate = new Date(Input::post($field['name']), $GLOBALS['TL_CONFIG'][$rgxp . 'Format']);
                     $field['value'] = $objDate->tstamp;
                 }
             }
@@ -1221,7 +1219,7 @@ class ModuleEventEditor extends \Events
             $this->generateRedirect($jumpToSelection, $DBid);
         } else {
             // Do NOT Submit
-            if ($this->Input->post('FORM_SUBMIT') == 'caledit_submit') {
+            if (Input::post('FORM_SUBMIT') == 'caledit_submit') {
                 $this->Template->InfoClass = 'tl_error';
                 $this->Template->InfoMessage = $GLOBALS['TL_LANG']['MSC']['caledit_error'];
             }
@@ -1233,19 +1231,19 @@ class ModuleEventEditor extends \Events
 
     protected function sendNotificationMail($NewEventData, $editID, $User, $cloneDates)
     {
-        $Notification = new \Contao\Email();
-        $Notification->from = $GLOBALS['TL_ADMIN_EMAIL'];
+        $notification = new Email();
+        $notification->from = $GLOBALS['TL_ADMIN_EMAIL'];
 
         $host = $this->Environment->host;
 
         if ($editID) {
             if ($editID == -1) {
-                $Notification->subject = sprintf($GLOBALS['TL_LANG']['MSC']['caledit_MailSubjectDelete'], $host);
+                $notification->subject = sprintf($GLOBALS['TL_LANG']['MSC']['caledit_MailSubjectDelete'], $host);
             } else {
-                $Notification->subject = sprintf($GLOBALS['TL_LANG']['MSC']['caledit_MailSubjectEdit'], $host);
+                $notification->subject = sprintf($GLOBALS['TL_LANG']['MSC']['caledit_MailSubjectEdit'], $host);
             }
         } else {
-            $Notification->subject = sprintf($GLOBALS['TL_LANG']['MSC']['caledit_MailSubjectNew'], $host);
+            $notification->subject = sprintf($GLOBALS['TL_LANG']['MSC']['caledit_MailSubjectNew'], $host);
         }
 
         $arrRecipients = trimsplit(',', $this->caledit_mailRecipient);
@@ -1273,10 +1271,10 @@ class ModuleEventEditor extends \Events
         if (!$this->caledit_allowPublish) {
             $mText .= "\n\n" . $GLOBALS['TL_LANG']['MSC']['caledit_BEUserHint'];
         }
-        $Notification->text = $mText;
+        $notification->text = $mText;
 
         foreach ($arrRecipients as $rec) {
-            $Notification->sendTo($rec);
+            $notification->sendTo($rec);
         }
     }
 
@@ -1322,7 +1320,7 @@ class ModuleEventEditor extends \Events
         // Fatal error, editing not allowed, abort.
         if ($fatalError) {
             $this->strTemplate = $this->caledit_template;
-            $this->Template = new \FrontendTemplate($this->strTemplate);
+            $this->Template = new FrontendTemplate($this->strTemplate);
             $this->Template->FatalError = $this->errorString;
             return;
         }

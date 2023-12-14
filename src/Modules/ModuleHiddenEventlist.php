@@ -2,9 +2,15 @@
 
 namespace DanielGausi\CalendarEditorBundle\Modules;
 
+use BackendTemplate;
+use CalendarEventsModel;
+use CalendarModel;
+use Config;
 use Contao\StringUtil;
+use ModuleEventlist;
+use PageModel;
 
-class ModuleHiddenEventlist extends \ModuleEventlist
+class ModuleHiddenEventlist extends ModuleEventlist
 {
 
     /**
@@ -34,7 +40,7 @@ class ModuleHiddenEventlist extends \ModuleEventlist
             $options['order'] = "$t.startTime";
         }
 
-        return \CalendarEventsModel::findBy($arrColumns, $pid, $options);
+        return CalendarEventsModel::findBy($arrColumns, $pid, $options);
     }
 
     protected function getAllEvents($arrCalendars, $intStart, $intEnd, $blnFeatured = null)
@@ -47,12 +53,12 @@ class ModuleHiddenEventlist extends \ModuleEventlist
 
         foreach ($arrCalendars as $id) {
             $strUrl = $this->strUrl;
-            $objCalendar = \CalendarModel::findByPk($id);
+            $objCalendar = CalendarModel::findByPk($id);
 
             // Get the current "jumpTo" page
             if ($objCalendar !== null && $objCalendar->jumpTo && ($objTarget = $objCalendar->getRelated('jumpTo')) !== null) {
-                /** @var \PageModel $objTarget */
-                $strUrl = $objTarget->getFrontendUrl((\Config::get('useAutoItem') && !\Config::get('disableAlias')) ? '/%s' : '/events/%s');
+                /** @var PageModel $objTarget */
+                $strUrl = $objTarget->getFrontendUrl((Config::get('useAutoItem') && !Config::get('disableAlias')) ? '/%s' : '/events/%s');
             }
             $objEvents = $this->findCurrentUnPublishedByPid($id, $intStart, $intEnd);
 
@@ -121,7 +127,7 @@ class ModuleHiddenEventlist extends \ModuleEventlist
     public function generate()
     {
         if (TL_MODE == 'BE') {
-            $objTemplate = new \BackendTemplate('be_wildcard');
+            $objTemplate = new BackendTemplate('be_wildcard');
 
             $objTemplate->wildcard = '### UNPULISHED EVENT LIST ###';
             $objTemplate->title = $this->headline;

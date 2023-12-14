@@ -2,11 +2,14 @@
 
 namespace DanielGausi\CalendarEditorBundle\Models;
 
-class CalendarModelEdit extends \CalendarModel
+use CalendarModel;
+use function is_array;
+
+class CalendarModelEdit extends CalendarModel
 {
     public static function findByIds($arrIds, array $arrOptions = array())
     {
-        if (empty($arrIds) || !\is_array($arrIds)) {
+        if (empty($arrIds) || !is_array($arrIds)) {
             return null;
         }
         $t = static::$strTable;

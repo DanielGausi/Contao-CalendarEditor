@@ -5,8 +5,9 @@ namespace DanielGausi\CalendarEditorBundle\Hooks;
 use Contao\System;
 use DanielGausi\CalendarEditorBundle\Models\CalendarModelEdit;
 use DanielGausi\CalendarEditorBundle\Services\CheckAuthService;
+use Frontend;
 
-class ListAllEventsHook extends \Frontend
+class ListAllEventsHook extends Frontend
 {
     protected string $strTemplate = '';
 

@@ -2,14 +2,16 @@
 
 namespace DanielGausi\CalendarEditorBundle\Modules;
 
+use BackendTemplate;
 use Contao\Date;
 use Contao\PageModel;
 use Contao\StringUtil;
 use Contao\System;
 use DanielGausi\CalendarEditorBundle\Models\CalendarModelEdit;
 use DanielGausi\CalendarEditorBundle\Services\CheckAuthService;
+use ModuleCalendar;
 
-class ModuleCalenderEdit extends \ModuleCalendar
+class ModuleCalenderEdit extends ModuleCalendar
 {
 	// variable which indicates whether events can be added or not (on elapsed days)
 	protected bool $allowElapsedEvents;
@@ -164,7 +166,7 @@ class ModuleCalenderEdit extends \ModuleCalendar
 	public function generate(): string
     {
         if (TL_MODE == 'BE') {
-            $objTemplate = new \BackendTemplate('be_wildcard');
+            $objTemplate = new BackendTemplate('be_wildcard');
 
             $objTemplate->wildcard = '### CALENDAR WITH FE EDITING ###';
             $objTemplate->title = $this->headline;

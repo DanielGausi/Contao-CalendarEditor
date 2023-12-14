@@ -48,7 +48,8 @@
 			<?php endif; ?>			
 			</div>
 			<?php foreach ($day['events'] as $event): ?>
-				<div class="event cal_<?= $event['parent']; ?><?= $event['class']; ?>"><a href="<?= $event['href']; ?>" title="<?= $event['title']; ?> (<?php if ($event['day']): echo $event['day']; ?>, <?php endif; echo $event['date']; if ($event['time']): ?>, <?= $event['time']; endif; ?>)"<?= $event['target']; ?>><?= $event['link']; ?></a>
+				<div class="event cal_<?= $event['parent']; ?><?= $event['class']; ?>">
+					<a href="<?= $event['href']; ?>" title="<?= $event['title']; ?> (<?php if ($event['day']): echo $event['day']; ?>, <?php endif; echo $event['date']; if ($event['time']): ?>, <?= $event['time']; endif; ?>)"<?= $event['target']; ?>><?= $event['link']; ?></a>
 				<?php if (isset($event['editRef']) && $event['editRef']): ?>
 					<a href="<?= $event['editRef']; ?>" title="<?= $event['editTitle']; ?>"> <?= $event['editLabel']; ?>  </a>
 				<?php endif; ?>

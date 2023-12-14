@@ -2,12 +2,14 @@
 
 namespace DanielGausi\CalendarEditorBundle\Modules;
 
+use BackendTemplate;
 use Contao\Events;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
 use DanielGausi\CalendarEditorBundle\Models\CalendarModelEdit;
 use DanielGausi\CalendarEditorBundle\Services\CheckAuthService;
+use FrontendTemplate;
 
 class ModuleEventReaderEdit extends Events
 {
@@ -25,7 +27,7 @@ class ModuleEventReaderEdit extends Events
 	public function generate()
 	{
 		if (TL_MODE == 'BE') {
-			$objTemplate = new \BackendTemplate('be_wildcard');
+			$objTemplate = new BackendTemplate('be_wildcard');
 
 			$objTemplate->wildcard = '### EVENT READER EDIT LINK ###';
 			$objTemplate->title = $this->headline;
@@ -53,7 +55,7 @@ class ModuleEventReaderEdit extends Events
 
 	protected function compile(): void
     {
-		$this->Template = new \FrontendTemplate($this->strTemplate);
+		$this->Template = new FrontendTemplate($this->strTemplate);
 		$this->Template->editRef = '';
 		
 		// FE user is logged in
@@ -131,13 +133,12 @@ class ModuleEventReaderEdit extends Events
 					if (!$authorizedElapsedEvents) {
 						// the user is authorized, but the event has elapsed
 						$this->Template->error = $GLOBALS['TL_LANG']['MSC']['caledit_NoPast'];
-						$this->Template->error_class = 'error';
-					} else {
+                    } else {
 						// the user is NOT authorized at all (reason: only the creator can edit it)						
 						$this->Template->error = $GLOBALS['TL_LANG']['MSC']['caledit_OnlyUser'];
-						$this->Template->error_class = 'error';
-					}
-				}
+                    }
+                    $this->Template->error_class = 'error';
+                }
 			}		
 		} else {
 			$this->Template->error_class = 'error';
