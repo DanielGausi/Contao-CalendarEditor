@@ -20,9 +20,15 @@
  * Front end modules
  */
 
-$GLOBALS['FE_MOD']['events']['calendarEdit']        = 'DanielGausi\CalendarEditorBundle\ModuleCalenderEdit';
-$GLOBALS['FE_MOD']['events']['EventEditor']         = 'DanielGausi\CalendarEditorBundle\ModuleEventEditor';
-$GLOBALS['FE_MOD']['events']['EventReaderEditLink'] = 'DanielGausi\CalendarEditorBundle\ModuleEventReaderEdit';
-$GLOBALS['FE_MOD']['events']['EventHiddenList']     = 'DanielGausi\CalendarEditorBundle\ModuleHiddenEventlist';
+use DanielGausi\CalendarEditorBundle\Hooks\ListAllEventsHook;
+use DanielGausi\CalendarEditorBundle\Modules\ModuleCalenderEdit;
+use DanielGausi\CalendarEditorBundle\Modules\ModuleEventEditor;
+use DanielGausi\CalendarEditorBundle\Modules\ModuleEventReaderEdit;
+use DanielGausi\CalendarEditorBundle\Modules\ModuleHiddenEventlist;
 
-$GLOBALS['TL_HOOKS']['getAllEvents'][] = array('ListAllEvents_Hook', 'updateAllEvents');
+$GLOBALS['FE_MOD']['events']['calendarEdit']        = ModuleCalenderEdit::class;
+$GLOBALS['FE_MOD']['events']['EventEditor']         = ModuleEventEditor::class;
+$GLOBALS['FE_MOD']['events']['EventReaderEditLink'] = ModuleEventReaderEdit::class;
+$GLOBALS['FE_MOD']['events']['EventHiddenList']     = ModuleHiddenEventlist::class;
+
+$GLOBALS['TL_HOOKS']['getAllEvents'][] = [ListAllEventsHook::class, 'updateAllEvents'];

@@ -1,0 +1,22 @@
+services:
+  _defaults:
+    autoconfigure: true
+    autowire: true
+
+  _instanceof:
+    Contao\CoreBundle\Framework\FrameworkAwareInterface:
+      calls:
+        - [ setFramework, [ '@contao.framework' ] ]
+
+    Symfony\Bundle\FrameworkBundle\Controller\AbstractController:
+      calls:
+        - [ setContainer, [ '@Psr\Container\ContainerInterface' ] ]
+
+    Symfony\Component\DependencyInjection\ContainerAwareInterface:
+      calls:
+        - [ setContainer, [ '@service_container' ] ]
+
+
+  caledit.service.auth:
+    class: DanielGausi\CalendarEditorBundle\Services\CheckAuthService
+    public: true

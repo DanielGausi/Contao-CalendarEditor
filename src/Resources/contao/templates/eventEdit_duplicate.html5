@@ -56,48 +56,27 @@
         <form action="<?php echo $this->action; ?>" method="post">
         <input type="hidden" name="FORM_SUBMIT" value="caledit_submit" /><?php echo $this->messages; ?>
 		<input type="hidden" name="REQUEST_TOKEN" value="{{request_token}}">
-		<table cellpadding="2" cellspacing="2" border="0" >
-		<tbody>
-			<tbody>
 			<?php for ($i = 1; $i <= 10; $i++): ?>
-				
-				<tr class="<?php echo $class; ?>">
-				<?php if ($this->fields['start'.$i]): ?>
-					<?php $objWidget = $this->fields['start'.$i]; ?>
-						<td class="label">
-						<?php echo $objWidget->generateLabel(); ?>
-						<?php echo $objWidget->generateWithError(); ?></td>
-				<?php endif; ?>
-			
-				<?php if ($this->fields['end'.$i]): ?>
-					<?php $objWidget = $this->fields['end'.$i]; ?>
-						<td class="label">
-						<?php echo $objWidget->generateLabel(); ?>
-						<?php echo $objWidget->generateWithError(); ?></td>
-				<?php endif; ?>
-				
+				<div class="event">
+					<?php if ($this->fields['start'.$i]): ?>
+						<?= $this->fields['start'.$i]->parse(); ?>
+					<?php endif; ?>
+
+					<?php if ($this->fields['end'.$i]): ?>
+						<?= $this->fields['end'.$i]->parse(); ?>
+					<?php endif; ?>
+				</div>
 			<?php endfor; ?>
 			
-			<?php if ($this->fields['captcha']): ?>
-				<?php $objWidget = $this->fields['captcha']; ?>		
-				<?= $objWidget->parse() ?>				
+			<?php if (isset($this->fields['captcha']) && $this->fields['captcha']): ?>
+				<?= $this->fields['captcha']->parse() ?>
 			<?php endif; ?>
-					
-			<tr class="<?php echo $class; ?>">
-				<td class="label">&nbsp;</td>
-				<td class="value"><input type="submit" class="submit" value="<?php echo $this->submit; ?>" /></td>
-			</tr>
+
+					<div class="widget"><input type="submit" class="submit" value="<?php echo $this->submit; ?>" /></div>
 			
 			<?php if ($this->fields['jumpToSelection']): ?>
-				<?php $objWidget = $this->fields['jumpToSelection']; ?>				
-				<tr class="<?php echo $class; ?>">
-					<td class="label"><?php echo $objWidget->generateLabel(); ?></td>
-					<td class="value"><?php echo $objWidget->generateWithError(); ?></td>
-				</tr>			
+					<?= $this->fields['jumpToSelection']->parse(); ?>
 			<?php endif; ?>
-		</tbody>
-		</tbody>
-		</table>       
         </form>
 </div>
 </div>
